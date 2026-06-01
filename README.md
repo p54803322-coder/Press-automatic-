@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v2.0 - Ultimate Fishing & Fly Integration ]]
--- แก้ไขบั๊กตัวแข็งหลังตกปลาเสร็จเด็ดขาด + ฝัง loadstring สคริปต์บินนอกตามสั่ง!
+-- [[ ppingyyy Hub v2.0 - Ultimate Anti-Freeze Skills Fix ]]
+-- แก้ไขบั๊กตัวแข็งขยับไม่ได้เวลากดใช้ ออโต้สกิล (Z, X, C, V) ทุกสกิลเรียบร้อย! 
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -225,30 +225,51 @@ local NoclipEnabled = false
 local function PressKey(keyStr)
     local keyCode = Enum.KeyCode[keyStr]
     if keyCode then
-        VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-        task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+        pcall(function()
+            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+            task.wait(0.06)
+            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+        end)
     end
 end
 
--- ลูปคุมสกิล Z, X, C, V
+-- **[ลูปคุมออโต้สกิล Z, X, C, V - แก้บั๊กตัวแข็งแบบเด็ดขาดทุกสกิล!]**
 task.spawn(function()
     while true do
-        task.wait(0.1)
+        task.wait(0.3) -- เพิ่มหน่วงเวลาลูป ไม่ให้สแปมดาต้าจนโดนตัวเกมแช่แข็ง
+
+        -- ตรวจสอบและบังคับคลายล็อกระบบเคลื่อนไหวของตัวละครตลอดเวลา (Anti-Freeze Mechanism)
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    -- ตรวจจับถ้าความเร็วหรือแรงกระโดดโดนระบบแช่แข็งเป็น 0 ให้ปลดทันที
+                    if hum.WalkSpeed == 0 then hum.WalkSpeed = 16 end
+                    if hum.JumpPower == 0 then hum.JumpPower = 50 end
+                    hum.PlatformStand = false
+                end
+            end
+        end)
+
+        -- ทำงานฝั่งสกิล V
         if SkillStates["V"] then
-            pcall(function() PressKey("V") end)
-            task.wait(0.5)
+            PressKey("V")
+            task.wait(0.6)
         end
+
+        -- ทำงานฝั่งสกิล Z, X, C
         local activeSkills = {}
         for key, isEnabled in pairs(SkillStates) do
-            if isEnabled and key ~= "V" then table.insert(activeSkills, key) end
+            if isEnabled and key ~= "V" then 
+                table.insert(activeSkills, key) 
+            end
         end
+
         if #activeSkills > 0 then
-            pcall(function()
-                local randomIndex = math.random(1, #activeSkills)
-                PressKey(activeSkills[randomIndex])
-            end)
-            task.wait(0.4)
+            local randomIndex = math.random(1, #activeSkills)
+            PressKey(activeSkills[randomIndex])
+            task.wait(0.5) -- หน่วงเวลาจังหวะสลับสกิล ให้ระบบมือถือประมวลผลทัน ไม่ล็อกตัว
         end
     end
 end)
@@ -261,7 +282,6 @@ task.spawn(function()
             pcall(function()
                 local char = LocalPlayer.Character
                 if char then
-                    -- ปรับเงื่อนไขให้ฉลาดขึ้น ตรวจจับตัวละครเสร็จงานแล้วปล่อยให้ขยับอิสระ
                     if not char:GetAttribute("Fishing") and not MainGui.Fishing.Visible then
                         ReplicatedStorage.Events.Fishing:FireServer()
                     end
@@ -271,19 +291,17 @@ task.spawn(function()
     end
 end)
 
--- **[ลูปย้ายเกจเขียว - แก้บั๊กตัวแข็งหลังตกปลาเสร็จเด็ดขาด!]**
+-- ลูปย้ายเกจเขียวตกปลา
 RunService.RenderStepped:Connect(function()
     if getgenv().PPINGYYY_Anchor then
-        local success, err = pcall(function()
+        pcall(function()
             local fishingUI = MainGui:FindFirstChild("Fishing")
-            -- ตรวจสอบให้มั่นใจว่าหน้าต่างมินิเกมยังเปิดคาจออยู่ ถึงจะรันบอทดึงเกจ
             if fishingUI and fishingUI.Visible then
                 local barFrame = fishingUI:FindFirstChild("BarFrame")
                 if barFrame and barFrame:FindFirstChild("Bar") then
                     local bar = barFrame.Bar
                     bar.Position = UDim2.new(0.5, 0, bar.Position.Y.Scale, 0)
                     
-                    -- หน่วงค่าการส่งแบบสุ่มความถี่ ไม่รัวจนเซิร์ฟเวอร์ดักแช่แข็งตัวละครมึง
                     if math.random(1, 4) == 1 then
                         ReplicatedStorage.Fishing:FireServer("1")
                     end
@@ -397,7 +415,7 @@ end)
 CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 5, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
 CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 50, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
 
--- **[ปุ่มเรียกใช้สคริปต์บินมหาเทพภายนอกตามที่มึงขอ]**
+-- ปุ่มเรียกใช้สคริปต์บิน FLY GUI V11
 local FlyScriptBtn = Instance.new("TextButton")
 FlyScriptBtn.Size = UDim2.new(0.93, 0, 0, 38)
 FlyScriptBtn.Position = UDim2.new(0, 0, 0, 95)
@@ -415,16 +433,12 @@ FlyStroke.Thickness = 1.2
 FlyScriptBtn.MouseButton1Click:Connect(function()
     FlyScriptBtn.Text = "⏳ กำลังรันสคริปต์บิน..."
     FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-    
-    -- รัน loadstring สคริปต์บิน Universal ตัวแรงที่มึงสั่งโดยตรง
     pcall(function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))()
     end)
-    
     task.wait(1)
     FlyScriptBtn.Text = "🚀 เปิดสคริปต์บิน FLY GUI V11"
     FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)
 end)
 
-print("------- ★ [ppingyyy Hub v2.0] Ultimate Fly & Freeze Fix Loaded! ★ -------")
-
+print("------- ★ [ppingyyy Hub v2.0] All Skills Freeze Fix Implemented! ★ -------")
