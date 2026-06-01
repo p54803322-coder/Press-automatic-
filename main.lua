@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v2.5 - Center Island Landing Fix ]]
--- แก้ไขพิกัดปุ่มหน้า 4 ใหม่ทั้งหมด ย้ายจุดแลนดิ้งขยับลึกเข้ากึ่งกลางเกาะ + เพิ่มความสูงกันร่วงลงน้ำทะเล!
+-- [[ ppingyyy Hub v2.5 - Integrated Skill Timing Update ]]
+-- รวมระบบ "กดสกิลเช็กอัตโนมัติ" ฝังเข้าไปในระบบออโต้สกิลหลักทันที ไม่ต้องเปิดปุ่มแยกให้รกจอ!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -7,7 +7,6 @@ local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local TweenService = game:GetService("TweenService")
 
 local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
@@ -27,7 +26,7 @@ sg.Parent = CoreGui
 -- ====================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 290)
+MainFrame.Size = UDim2.new(0, 410, 0, 230) -- ปรับขนาดกลับมาเท่าเดิมเพราะสลัดปุ่มรก ๆ ออกไปแล้ว
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
@@ -47,7 +46,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v2.5"
+Title.Text = "★ PPINGYYY HUB v3.1"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -77,8 +76,8 @@ PagesArea.Parent = MainFrame
 
 local Page1_Skills = Instance.new("ScrollingFrame")
 Page1_Skills.Size = UDim2.new(1, 0, 1, 0)
-Page1_Skills.BackgroundTransparency = 1; Page1_Skills.ScrollBarThickness = 0
-Page1_Skills.Visible = true; Page1_Skills.Parent = PagesArea
+Page1_Skills.BackgroundTransparency = 1; Page1_Skills.ScrollBarThickness = 3
+Page1_Skills.CanvasSize = UDim2.new(0, 0, 0, 180); Page1_Skills.Visible = true; Page1_Skills.Parent = PagesArea
 
 local Page2_Fishing = Instance.new("ScrollingFrame")
 Page2_Fishing.Size = UDim2.new(1, 0, 1, 0)
@@ -87,13 +86,13 @@ Page2_Fishing.Visible = false; Page2_Fishing.Parent = PagesArea
 
 local Page3_Utils = Instance.new("ScrollingFrame")
 Page3_Utils.Size = UDim2.new(1, 0, 1, 0)
-Page3_Utils.BackgroundTransparency = 1; Page3_Utils.ScrollBarThickness = 3
-Page3_Utils.CanvasSize = UDim2.new(0, 0, 0, 200); Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
+Page3_Utils.BackgroundTransparency = 1; Page3_Utils.ScrollBarThickness = 0
+Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
 
 local Page4_Teleport = Instance.new("ScrollingFrame")
 Page4_Teleport.Size = UDim2.new(1, 0, 1, 0)
 Page4_Teleport.BackgroundTransparency = 1; Page4_Teleport.ScrollBarThickness = 3
-Page4_Teleport.CanvasSize = UDim2.new(0, 0, 0, 320); Page4_Teleport.Visible = false; Page4_Teleport.Parent = PagesArea
+Page4_Teleport.CanvasSize = UDim2.new(0, 0, 0, 200); Page4_Teleport.Visible = false; Page4_Teleport.Parent = PagesArea
 
 -- ====================================================================
 -- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X]]
@@ -123,11 +122,11 @@ MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
         TabBar.Visible = false; PagesArea.Visible = false
-        MainFrame.Size = UDim2.new(0, 400, 0, 45)
+        MainFrame.Size = UDim2.new(0, 410, 0, 45)
         MinBtn.Text = "[+]"
     else
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 400, 0, 290)
+        MainFrame.Size = UDim2.new(0, 410, 0, 230)
         MinBtn.Text = "[-]"
     end
 end)
@@ -167,7 +166,7 @@ CancelBtn.BackgroundTransparency = 1; CancelBtn.ZIndex = 11; CancelBtn.Parent = 
 CloseBtn.MouseButton1Click:Connect(function()
     if isMinimized then
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 400, 0, 290)
+        MainFrame.Size = UDim2.new(0, 410, 0, 230)
         MinBtn.Text = "[-]"; isMinimized = false
     end
     ConfirmPanel.Visible = true
@@ -182,7 +181,7 @@ ShutUpBtn.MouseButton1Click:Connect(DestroyHub)
 -- ====================================================================
 local function CreateTabButton(name, posY, targetPage)
     local TBtn = Instance.new("TextButton")
-    TBtn.Size = UDim2.new(1, 0, 0, 32)
+    TBtn.Size = UDim2.new(1, 0, 0, 30)
     TBtn.Position = UDim2.new(0, 0, 0, posY)
     TBtn.Text = name
     TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -203,9 +202,9 @@ local function CreateTabButton(name, posY, targetPage)
 end
 
 CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
-CreateTabButton("🎣 ออโต้ตกปลา", 42, Page2_Fishing)
-CreateTabButton("🛠️ อำนวยความสะดวก", 79, Page3_Utils)
-CreateTabButton("🏝️ บินเนียนไปเกาะ", 116, Page4_Teleport)
+CreateTabButton("🎣 ออโต้ตกปลา", 38, Page2_Fishing)
+CreateTabButton("🛠️ อำนวยความสะดวก", 71, Page3_Utils)
+CreateTabButton("🏝️ วาร์ปไปเกาะ", 104, Page4_Teleport)
 
 -- ====================================================================
 -- [4. ระบบทำงานหลังบ้าน (Backend)]
@@ -216,7 +215,6 @@ getgenv().PPINGYYY_Anchor = false
 
 local ClimbWallEnabled = false
 local NoclipEnabled = false
-local IsTweening = false 
 
 local function PressKey(keyStr)
     local keyCode = Enum.KeyCode[keyStr]
@@ -229,40 +227,7 @@ local function PressKey(keyStr)
     end
 end
 
-local function TweenToIsland(targetCFrame)
-    local char = LocalPlayer.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not hum or IsTweening then return end
-
-    IsTweening = true
-    
-    local currentPos = hrp.Position
-    local targetPos = targetCFrame.Position
-    local distance = (currentPos - targetPos).Magnitude
-    local speed = 86 
-    local duration = distance / speed
-
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bodyVelocity.Parent = hrp
-
-    hum.PlatformStand = true
-
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-    
-    tween:Play()
-    tween.Completed:Wait()
-
-    bodyVelocity:Destroy()
-    hum.PlatformStand = false
-    IsTweening = false
-end
-
--- ลูปคุมออโต้สกิล
+-- ลูปคุมออโต้สกิล Z, X, C, V
 task.spawn(function()
     while true do
         task.wait(0.3) 
@@ -276,6 +241,32 @@ task.spawn(function()
             PressKey(activeSkills[randomIndex])
             task.wait(0.5) 
         end
+    end
+end)
+
+-- [ระบบฝังรวม]: ลูปแสกนและกดวงกลมเช็กจังหวะอัตโนมัติ (จะทำงานเมื่อมีการเปิดออโต้สกิลอย่างน้อย 1 ปุ่ม)
+RunService.RenderStepped:Connect(function()
+    if SkillStates.Z or SkillStates.X or SkillStates.C or SkillStates.V then
+        pcall(function()
+            local pGui = LocalPlayer.PlayerGui
+            local skillCheckNames = {"SkillCheck", "CircleCheck", "TimingGui", "QTEGui", "QuickTimeEvent", "PerfectClick"}
+            
+            for _, name in pairs(skillCheckNames) do
+                local targetGui = pGui:FindFirstChild(name)
+                -- ถ้าเจอกรอบเช็กสกิลเด้งขึ้นมาบนหน้าจอ
+                if targetGui and targetGui.Enabled == true then
+                    -- จำลองการคลิกเมาส์ซ้ายเผื่อเป็นแบบคลิกตรงวงกลม
+                    if targetGui:FindFirstChild("Button") then
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                    end
+                    -- จำลองการกด Spacebar เผื่อบางเกมให้กด Spacebar สกัดจังหวะวงกลม
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+                    break
+                end
+            end
+        end)
     end
 end)
 
@@ -336,6 +327,17 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- ฟังก์ชันระบบวาร์ปเกาะแว๊บเลย
+local function InstantTeleport(targetVector3)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+            char.HumanoidRootPart.CFrame = CFrame.new(targetVector3)
+        end
+    end)
+end
+
 -- ====================================================================
 -- [5. ฟังก์ชันสร้างปุ่มควบคุมระบบหน้า 1, 2, 3]
 -- ====================================================================
@@ -366,6 +368,7 @@ local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCa
     end)
 end
 
+-- หน้า 1: ออโต้สกิล (ระบบ Perfect Skill Timing จะฝังอยู่ในนี้โดยอัตโนมัติแล้ว)
 CreateFunctionButton("Z", 5, Page1_Skills, true, function() SkillStates.Z = not SkillStates.Z return SkillStates.Z end)
 CreateFunctionButton("X", 46, Page1_Skills, true, function() SkillStates.X = not SkillStates.X return SkillStates.X end)
 CreateFunctionButton("C", 87, Page1_Skills, true, function() SkillStates.C = not SkillStates.C return SkillStates.C end)
@@ -409,33 +412,31 @@ ResetMoveBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ====================================================================
--- [6. ระบบสร้างปุ่มบินแบบเนียนหน้า 4 - อัปเดตพิกัดใจกลางเกาะ (Center Fixed)]
+-- [6. ส่วนปุ่มหน้า 4 - ระบบปุ่มกดวาร์ปแว๊บไปเกาะทันที]
 -- ====================================================================
-local function CreateIslandTweenButton(islandName, cframeValue, posY)
+local function CreateTpButton(islandName, posY, targetPos)
     local TpBtn = Instance.new("TextButton")
     TpBtn.Size = UDim2.new(0.93, 0, 0, 36)
     TpBtn.Position = UDim2.new(0, 0, 0, posY)
-    TpBtn.Text = islandName 
+    TpBtn.Text = "⚡ วาร์ปไป : " .. islandName
     TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TpBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    TpBtn.BackgroundColor3 = Color3.fromRGB(30, 140, 90)
     TpBtn.Font = Enum.Font.GothamBold
     TpBtn.TextSize = 11
     TpBtn.Parent = Page4_Teleport
-    
     Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 6)
+    
     local Stroke = Instance.new("UIStroke", TpBtn)
-    Stroke.Color = Color3.fromRGB(0, 255, 150); Stroke.Thickness = 1 
+    Stroke.Color = Color3.fromRGB(0, 0, 0); Stroke.Thickness = 1.2
 
-    TpBtn.MouseButton1Click:Connect(function() TweenToIsland(cframeValue) end)
+    TpBtn.MouseButton1Click:Connect(function()
+        InstantTeleport(targetPos)
+    end)
 end
 
--- ปรับพิกัดขยับเข้าหาใจกลางแผ่นดินของเกาะแต่ละเกาะ + ยกความสูงแกน Y เป็น 155-245 ปลอดภัย 100%
-CreateIslandTweenButton("🛸 Fly to: Moosewood (เกาะเริ่มต้น)", CFrame.new(383, 142, 255), 5)
-CreateIslandTweenButton("🛸 Fly to: Roslit Bay (เกาะป่าแดง)", CFrame.new(-1475, 145, 730), 46)
-CreateIslandTweenButton("🛸 Fly to: Sunstone Island (เกาะประภาคาร)", CFrame.new(-940, 235, -990), 87)
-CreateIslandTweenButton("🛸 Fly to: Mushgrove Swamp (เกาะหนองน้ำเห็ด)", CFrame.new(2465, 145, -705), 128)
-CreateIslandTweenButton("🛸 Fly to: Terrapin Island (เกาะเต่า)", CFrame.new(-195, 150, 1965), 169)
-CreateIslandTweenButton("🛸 Fly to: Snowcap Island (เกาะหิมะ)", CFrame.new(2635, 155, 2420), 210)
-CreateIslandTweenButton("🛸 Fly to: Forsaken Shores (เกาะร้างฝั่งตะวันตก)", CFrame.new(-2525, 145, -1665), 251)
+CreateTpButton("เกาะที่ 1", 5, Vector3.new(100, 50, 100))
+CreateTpButton("เกาะที่ 2", 46, Vector3.new(500, 50, -200))
+CreateTpButton("เกาะที่ 3", 87, Vector3.new(-300, 50, 800))
+CreateTpButton("เกาะที่ 4", 128, Vector3.new(1200, 50, 1200))
 
-print("------- ★ [ppingyyy Hub v2.5] Center Island Landing Fixed! ★ -------")
+print("------- ★ [ppingyyy Hub v3.1] Integrated Skill Timing Active! ★ -------")
