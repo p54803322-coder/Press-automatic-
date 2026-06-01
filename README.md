@@ -394,4 +394,48 @@ FlyScriptBtn.MouseButton1Click:Connect(function() pcall(function() loadstring(ga
 
 local ResetMoveBtn = Instance.new("TextButton")
 ResetMoveBtn.Size = UDim2.new(0.93, 0, 0, 36); ResetMoveBtn.Position = UDim2.new(0, 0, 0, 128)
-ResetMoveBtn.Text = "🛠️ ฟื้นฟูระบบเดิน/กระโดด (Reset)"; ResetMoveBtn.TextColor3 =
+ResetMoveBtn.Text = "🛠️ ฟื้นฟูระบบเดิน/กระโดด (Reset)"; ResetMoveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); ResetMoveBtn.BackgroundColor3 = Color3.fromRGB(230, 100, 0)
+ResetMoveBtn.Font = Enum.Font.GothamBold; ResetMoveBtn.TextSize = 11; ResetMoveBtn.Parent = Page3_Utils
+Instance.new("UICorner", ResetMoveBtn).CornerRadius = UDim.new(0, 6)
+ResetMoveBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+            char:FindFirstChildOfClass("Humanoid").JumpPower = 50
+            char:FindFirstChildOfClass("Humanoid").PlatformStand = false
+        end
+    end)
+end)
+
+-- ====================================================================
+-- [6. ระบบสร้างปุ่มบินแบบเนียนหน้า 4 - อัปเดตพิกัดใจกลางเกาะ (Center Fixed)]
+-- ====================================================================
+local function CreateIslandTweenButton(islandName, cframeValue, posY)
+    local TpBtn = Instance.new("TextButton")
+    TpBtn.Size = UDim2.new(0.93, 0, 0, 36)
+    TpBtn.Position = UDim2.new(0, 0, 0, posY)
+    TpBtn.Text = islandName 
+    TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TpBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    TpBtn.Font = Enum.Font.GothamBold
+    TpBtn.TextSize = 11
+    TpBtn.Parent = Page4_Teleport
+    
+    Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke", TpBtn)
+    Stroke.Color = Color3.fromRGB(0, 255, 150); Stroke.Thickness = 1 
+
+    TpBtn.MouseButton1Click:Connect(function() TweenToIsland(cframeValue) end)
+end
+
+-- ปรับพิกัดขยับเข้าหาใจกลางแผ่นดินของเกาะแต่ละเกาะ + ยกความสูงแกน Y เป็น 155-245 ปลอดภัย 100%
+CreateIslandTweenButton("🛸 Fly to: Moosewood (เกาะเริ่มต้น)", CFrame.new(383, 142, 255), 5)
+CreateIslandTweenButton("🛸 Fly to: Roslit Bay (เกาะป่าแดง)", CFrame.new(-1475, 145, 730), 46)
+CreateIslandTweenButton("🛸 Fly to: Sunstone Island (เกาะประภาคาร)", CFrame.new(-940, 235, -990), 87)
+CreateIslandTweenButton("🛸 Fly to: Mushgrove Swamp (เกาะหนองน้ำเห็ด)", CFrame.new(2465, 145, -705), 128)
+CreateIslandTweenButton("🛸 Fly to: Terrapin Island (เกาะเต่า)", CFrame.new(-195, 150, 1965), 169)
+CreateIslandTweenButton("🛸 Fly to: Snowcap Island (เกาะหิมะ)", CFrame.new(2635, 155, 2420), 210)
+CreateIslandTweenButton("🛸 Fly to: Forsaken Shores (เกาะร้างฝั่งตะวันตก)", CFrame.new(-2525, 145, -1665), 251)
+
+print("------- ★ [ppingyyy Hub v2.5] Center Island Landing Fixed! ★ -------")
