@@ -1,10 +1,15 @@
--- [[ ppingyyy Hub v1.9 - Manual Sell & Smooth Combo ]]
--- ปรับปุ่มขายปลาเป็นแบบกดครั้งเดียวขายหมดตัวทันที ไม่ต้องเปิดออโต้ค้างไว้ เอาไปยัด GitHub เลยมึง!
+-- [[ ppingyyy Hub v2.0 - Ultimate Hack & Fishing Integration ]]
+-- เพิ่มหมวดหมู่ที่ 3 ระบบอำนวยความสะดวก: ปีนกำแพง, บิน, ทะลุ, มองผู้เล่น ยัดรวมในลิงก์เดียว!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local Workspace = game:GetService("Workspace")
+
+local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
 -- ลบ GUI ตัวเก่าออกก่อนรันตัวใหม่
 if CoreGui:FindFirstChild("ppingyyy_MainHub") then
@@ -18,11 +23,11 @@ sg.ResetOnSpawn = false
 sg.Parent = CoreGui
 
 -- ====================================================================
--- [1. หน้าต่างหลัก (Main Frame)]
+-- [1. หน้าต่างหลัก (Main Frame) - ขยายขนาดเพื่อรองรับ 3 หมวดหมู่]
 -- ====================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 350, 0, 260)
+MainFrame.Size = UDim2.new(0, 380, 0, 280)
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
@@ -39,11 +44,10 @@ MainStroke.Color = Color3.fromRGB(45, 45, 50)
 MainStroke.Thickness = 2
 MainStroke.Parent = MainFrame
 
--- หัวข้อสคริปต์
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v1.9"
+Title.Text = "★ PPINGYYY HUB v2.0"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -51,7 +55,6 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 Title.Parent = MainFrame
 
--- เส้นคั่นบน
 local Divider = Instance.new("Frame")
 Divider.Size = UDim2.new(0.92, 0, 0, 1)
 Divider.Position = UDim2.new(0.04, 0, 0, 45)
@@ -61,17 +64,18 @@ Divider.Parent = MainFrame
 
 -- แผงเมนูด้านซ้าย (Sidebar) & ขวา (Pages)
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(0, 110, 1, -55)
+TabBar.Size = UDim2.new(0, 120, 1, -55)
 TabBar.Position = UDim2.new(0, 10, 0, 50)
 TabBar.BackgroundTransparency = 1
 TabBar.Parent = MainFrame
 
 local PagesArea = Instance.new("Frame")
-PagesArea.Size = UDim2.new(1, -135, 1, -55)
-PagesArea.Position = UDim2.new(0, 125, 0, 50)
+PagesArea.Size = UDim2.new(1, -145, 1, -55)
+PagesArea.Position = UDim2.new(0, 135, 0, 50)
 PagesArea.BackgroundTransparency = 1
 PagesArea.Parent = MainFrame
 
+-- สร้างโครงหน้าเพจทั้ง 3 หน้า
 local Page1_Skills = Instance.new("ScrollingFrame")
 Page1_Skills.Size = UDim2.new(1, 0, 1, 0)
 Page1_Skills.BackgroundTransparency = 1
@@ -86,12 +90,19 @@ Page2_Fishing.ScrollBarThickness = 0
 Page2_Fishing.Visible = false
 Page2_Fishing.Parent = PagesArea
 
+local Page3_Utils = Instance.new("ScrollingFrame")
+Page3_Utils.Size = UDim2.new(1, 0, 1, 0)
+Page3_Utils.BackgroundTransparency = 1
+Page3_Utils.ScrollBarThickness = 3
+Page3_Utils.CanvasSize = UDim2.new(0, 0, 1.3, 0) -- ขยายให้เลื่อนสกรอลล์ลงมาได้
+Page3_Utils.Parent = PagesArea
+
 -- ====================================================================
 -- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X] (ลบเลยหุบปาก)]
 -- ====================================================================
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 25, 0, 25)
-MinBtn.Position = UDim2.new(0.8, 0, 0, 10)
+MinBtn.Position = UDim2.new(0.82, 0, 0, 10)
 MinBtn.Text = "[-]"
 MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
@@ -101,7 +112,7 @@ Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 25, 0, 25)
-CloseBtn.Position = UDim2.new(0.89, 0, 0, 10)
+CloseBtn.Position = UDim2.new(0.9, 0, 0, 10)
 CloseBtn.Text = "[X]"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
@@ -114,11 +125,11 @@ MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
         TabBar.Visible = false; PagesArea.Visible = false
-        MainFrame.Size = UDim2.new(0, 350, 0, 45)
+        MainFrame.Size = UDim2.new(0, 380, 0, 45)
         MinBtn.Text = "[+]"
     else
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 350, 0, 260)
+        MainFrame.Size = UDim2.new(0, 380, 0, 280)
         MinBtn.Text = "[-]"
     end
 end)
@@ -164,7 +175,7 @@ CancelBtn.Parent = ConfirmPanel
 CloseBtn.MouseButton1Click:Connect(function()
     if isMinimized then
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 350, 0, 260)
+        MainFrame.Size = UDim2.new(0, 380, 0, 280)
         MinBtn.Text = "[-]"; isMinimized = false
     end
     ConfirmPanel.Visible = true
@@ -175,7 +186,7 @@ SureBtn.MouseButton1Click:Connect(DestroyHub)
 ShutUpBtn.MouseButton1Click:Connect(DestroyHub)
 
 -- ====================================================================
--- [3. ฟังก์ชันสลับหน้า Tab]
+-- [3. ฟังก์ชันสลับหน้า Tab (รองรับ 3 ปุ่ม)]
 -- ====================================================================
 local function CreateTabButton(name, posY, targetPage)
     local TBtn = Instance.new("TextButton")
@@ -190,7 +201,7 @@ local function CreateTabButton(name, posY, targetPage)
     Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
 
     TBtn.MouseButton1Click:Connect(function()
-        Page1_Skills.Visible = false; Page2_Fishing.Visible = false
+        Page1_Skills.Visible = false; Page2_Fishing.Visible = false; Page3_Utils.Visible = false
         targetPage.Visible = true
         for _, v in pairs(TabBar:GetChildren()) do
             if v:IsA("TextButton") then v.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end
@@ -201,12 +212,19 @@ end
 
 CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
 CreateTabButton("🎣 ออโต้ตกปลา", 45, Page2_Fishing)
+CreateTabButton("🛠️ อำนวยความสะดวก", 85, Page3_Utils)
 
 -- ====================================================================
--- [4. ระบบทำงานหลังบ้าน (สับสกิลสุ่ม + ล็อกเกจ)]
+-- [4. ระบบฟังก์ชันการทำงานเบื้องหลัง (Backend)]
 -- ====================================================================
 local SkillStates = { Z = false, X = false, C = false, V = false }
-local AutoCatchEnabled = false
+getgenv().PPINGYYY_Anchor = false
+
+-- ตัวแปรระบบแฮกหน้า 3
+local ClimbWallEnabled = false
+local FlyEnabled = false
+local NoclipEnabled = false
+local EspEnabled = false
 
 local function PressKey(keyStr)
     local keyCode = Enum.KeyCode[keyStr]
@@ -217,34 +235,18 @@ local function PressKey(keyStr)
     end
 end
 
--- ฟังก์ชันยิงรีโมทขายปลาทันที (เรียกใช้ตอนกดปุ่มแมนนวล)
-local function SellFishNow()
-    pcall(function()
-        local sellRemote = game:GetService("ReplicatedStorage"):FindFirstChild("SellFish", true) or 
-                           game:GetService("ReplicatedStorage"):FindFirstChild("Sell", true) or
-                           game:GetService("ReplicatedStorage"):FindFirstChild("SellItems", true)
-        if sellRemote and (sellRemote:IsA("RemoteEvent") or sellRemote:IsA("RemoteFunction")) then
-            sellRemote:FireServer()
-        end
-    end)
-end
-
+-- ลูปคุมสกิล
 task.spawn(function()
     while true do
         task.wait(0.1)
-        
-        -- ลอจิก V นำร่อง
         if SkillStates["V"] then
             pcall(function() PressKey("V") end)
             task.wait(0.5)
         end
-        
-        -- ลอจิกสุ่มปุ่มที่เหลือ
         local activeSkills = {}
         for key, isEnabled in pairs(SkillStates) do
             if isEnabled and key ~= "V" then table.insert(activeSkills, key) end
         end
-        
         if #activeSkills > 0 then
             pcall(function()
                 local randomIndex = math.random(1, #activeSkills)
@@ -252,18 +254,112 @@ task.spawn(function()
             end)
             task.wait(0.4)
         end
+    end
+end)
 
-        -- บอทตกปลาล็อกเกจตรงกลาง
-        if AutoCatchEnabled then
+-- ลูปคุมล็อกเกจตกปลาตรงกลาง
+RunService.RenderStepped:Connect(function()
+    if getgenv().PPINGYYY_Anchor then
+        pcall(function()
+            local fishingUI = MainGui.Fishing
+            if fishingUI.Visible then
+                local bar = fishingUI.BarFrame.Bar
+                bar.Position = UDim2.new(0.5, 0, bar.Position.Y.Scale, 0)
+                ReplicatedStorage.Fishing:FireServer("1")
+            end
+        end)
+    end
+end)
+
+-- ลูปคุมระบบอำนวยความสะดวก (ปีนกำแพง, บิน, ทะลุกำแพง)
+local flyBodyVelocity
+RunService.Stepped:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+
+    -- 1. ลอจิกปีนกำแพงอัตโนมัติ (ชนกำแพงแล้วกระโดดรัวๆ ออกห่างหยุดทำงาน)
+    if ClimbWallEnabled then
+        pcall(function()
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {char}
+            raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+            -- ยิงลำแสงเลเซอร์ไปข้างหน้าตัวละคร 2.5 หน่วย เพื่อเช็กกำแพง
+            local rayOrigin = hrp.Position
+            local rayDirection = hrp.CFrame.LookVector * 2.5
+            local raycastResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+
+            if raycastResult and raycastResult.Instance then
+                -- ถ้าชนกำแพง สั่งกระโดดดีดตัวขึ้นทันทีเหมือน Infinite Jump
+                hrp.Velocity = Vector3.new(hrp.Velocity.X, 45, hrp.Velocity.Z)
+            end
+        end)
+    end
+
+    -- 2. ลอจิกทะลุกำแพง (Noclip)
+    if NoclipEnabled then
+        for _, part in pairs(char:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+
+    -- 3. ลอจิกบินเท่ๆ (Fly Hack)
+    if FlyEnabled then
+        pcall(function()
+            if not flyBodyVelocity then
+                flyBodyVelocity = Instance.new("BodyVelocity")
+                flyBodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                flyBodyVelocity.Parent = hrp
+            end
+            -- ควบคุมทิศทางตามปุ่มการเดินและทิศทางของมุมกล้องในมือถือ/คอม
+            local camera = Workspace.CurrentCamera
+            local moveDirection = hum.MoveDirection
+            if moveDirection.Magnitude > 0 then
+                flyBodyVelocity.Velocity = camera.CFrame:VectorToWorldSpace(Vector3.new(moveDirection.X, 0, -moveDirection.Z).Unit * 50)
+            else
+                flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            end
+        end)
+    else
+        if flyBodyVelocity then
+            flyBodyVelocity:Destroy()
+            flyBodyVelocity = nil
+        end
+    end
+end)
+
+-- 4. ลอจิกมองทะลุผู้เล่นทุกคนในเซิร์ฟ (ESP)
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if EspEnabled then
             pcall(function()
-                local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-                if playerGui then
-                    for _, v in pairs(playerGui:GetDescendants()) do
-                        if v.Name == "Bar" or v.Name == "GreenBar" or v.Name == "FishingBar" then
-                            if v:IsA("GuiObject") then
-                                v.Position = UDim2.new(0.5, 0, v.Position.Y.Scale, v.Position.Y.Offset)
-                            end
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        if not p.Character:FindFirstChild("ppingyyy_ESP") then
+                            local highlight = Instance.new("Highlight")
+                            highlight.Name = "ppingyyy_ESP"
+                            highlight.FillColor = Color3.fromRGB(255, 0, 0) -- แดงสะท้อนแสง
+                            highlight.FillTransparency = 0.5
+                            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            highlight.OutlineTransparency = 0
+                            highlight.Adornee = p.Character
+                            highlight.Parent = p.Character
                         end
+                    end
+                end
+            end)
+        else
+            -- ถ้าสั่งปิดให้กวาดล้างลบ ESP ออกให้หมดจอ
+            pcall(function()
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p.Character and p.Character:FindFirstChild("ppingyyy_ESP") then
+                        p.Character["ppingyyy_ESP"]:Destroy()
                     end
                 end
             end)
@@ -276,7 +372,7 @@ end)
 -- ====================================================================
 local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCallback)
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(0.95, 0, 0, 38)
+    Btn.Size = UDim2.new(0.93, 0, 0, 38)
     Btn.Position = UDim2.new(0, 0, 0, posY)
     Btn.Text = (isSkill and ("AUTO " .. keyName .. " : OFF")) or (keyName .. " : OFF")
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255) 
@@ -310,35 +406,39 @@ CreateFunctionButton("X", 50, Page1_Skills, true, function() SkillStates.X = not
 CreateFunctionButton("C", 95, Page1_Skills, true, function() SkillStates.C = not SkillStates.C return SkillStates.C end)
 CreateFunctionButton("V", 140, Page1_Skills, true, function() SkillStates.V = not SkillStates.V return SkillStates.V end)
 
--- สร้างปุ่มตกปลาหน้า 2 (ล็อกเกจ)
-CreateFunctionButton("ล็อกเกจตรงกลาง (Auto Catch)", 5, Page2_Fishing, false, function() AutoCatchEnabled = not AutoCatchEnabled return AutoCatchEnabled end)
+-- สร้างปุ่มตกปลาหน้า 2
+CreateFunctionButton("ล็อกเกจตรงกลาง (Auto Catch)", 5, Page2_Fishing, false, function() 
+    getgenv().PPINGYYY_Anchor = not getgenv().PPINGYYY_Anchor 
+    return getgenv().PPINGYYY_Anchor 
+end)
 
--- --- [สร้างปุ่มแบบแมนนวลพิเศษ: กดปุ๊บขายปลาหมดตัวทันที] ---
 local ManualSellBtn = Instance.new("TextButton")
-ManualSellBtn.Size = UDim2.new(0.95, 0, 0, 38)
+ManualSellBtn.Size = UDim2.new(0.93, 0, 0, 38)
 ManualSellBtn.Position = UDim2.new(0, 0, 0, 50)
 ManualSellBtn.Text = "💰 ขายปลาทั้งหมดทันที"
 ManualSellBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ManualSellBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100) -- สีเขียวมรกตค้าขายร่ำรวย
+ManualSellBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100)
 ManualSellBtn.Font = Enum.Font.GothamBold
 ManualSellBtn.TextSize = 12
 ManualSellBtn.Parent = Page2_Fishing
-
 Instance.new("UICorner", ManualSellBtn).CornerRadius = UDim.new(0, 6)
 local SellStroke = Instance.new("UIStroke", ManualSellBtn)
 SellStroke.Color = Color3.fromRGB(0, 0, 0)
 SellStroke.Thickness = 1.2
 
--- ลอจิกกดคลิกเดียวขายเกลี้ยงตู้
 ManualSellBtn.MouseButton1Click:Connect(function()
-    SellFishNow() -- สั่งยิงคำสั่งขายทันที
-    
-    -- ทำวิชวลปุ่มกระพริบสีแดงแป๊บนึงให้รู้ว่ากดติดแล้ว 555
-    ManualSellBtn.Text = "✔ ขายสำเร็จแล้ว!"
+    pcall(function() ReplicatedStorage.Events.SellFish:FireServer("All") end)
+    ManualSellBtn.Text = "✔ ¡VENDIDO! (ขายแล้ว)"
     ManualSellBtn.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
     task.wait(0.5)
     ManualSellBtn.Text = "💰 ขายปลาทั้งหมดทันที"
     ManualSellBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100)
 end)
 
-print("------- ★ [ppingyyy Hub v1.9] Manual Sell Updated! ★ -------")
+-- --- [สร้างปุ่มหน้า 3 หมวดหมู่ระบบอำนวยความสะดวก (Utility)] ---
+CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 5, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
+CreateFunctionButton("ระบบบินร่อนกลางเวหา (Fly)", 50, Page3_Utils, false, function() FlyEnabled = not FlyEnabled return FlyEnabled end)
+CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 95, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
+CreateFunctionButton("มองเห็นผู้เล่นทุกคน (ESP)", 140, Page3_Utils, false, function() EspEnabled = not EspEnabled return EspEnabled end)
+
+print("------- ★ [ppingyyy Hub v2.0] Ultimate Utility Pack Loaded! ★ -------")
