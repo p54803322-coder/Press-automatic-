@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v2.5 - Requested Thai Label Style ]]
--- เพิ่มวงเล็บภาษาไทยที่ปุ่มวาร์ปหน้า 4 เรียบร้อย! บินเนียนความเร็ว 86 ลุยข้ามทะเลหลบแอนตี้ชีต!
+-- [[ ppingyyy Hub v2.5 - Center Island Landing Fix ]]
+-- แก้ไขพิกัดปุ่มหน้า 4 ใหม่ทั้งหมด ย้ายจุดแลนดิ้งขยับลึกเข้ากึ่งกลางเกาะ + เพิ่มความสูงกันร่วงลงน้ำทะเล!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -394,49 +394,4 @@ FlyScriptBtn.MouseButton1Click:Connect(function() pcall(function() loadstring(ga
 
 local ResetMoveBtn = Instance.new("TextButton")
 ResetMoveBtn.Size = UDim2.new(0.93, 0, 0, 36); ResetMoveBtn.Position = UDim2.new(0, 0, 0, 128)
-ResetMoveBtn.Text = "🛠️ ฟื้นฟูระบบเดิน/กระโดด (Reset)"; ResetMoveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); ResetMoveBtn.BackgroundColor3 = Color3.fromRGB(230, 100, 0)
-ResetMoveBtn.Font = Enum.Font.GothamBold; ResetMoveBtn.TextSize = 11; ResetMoveBtn.Parent = Page3_Utils
-Instance.new("UICorner", ResetMoveBtn).CornerRadius = UDim.new(0, 6)
-ResetMoveBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChildOfClass("Humanoid") then
-            char:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
-            char:FindFirstChildOfClass("Humanoid").JumpPower = 50
-            char:FindFirstChildOfClass("Humanoid").PlatformStand = false
-        end
-    end)
-end)
-
--- ====================================================================
--- [6. ระบบสร้างปุ่มบินแบบเนียนหน้า 4 - เพิ่มวงเล็บภาษาไทยเรียบร้อย]
--- ====================================================================
-local function CreateIslandTweenButton(islandName, cframeValue, posY)
-    local TpBtn = Instance.new("TextButton")
-    TpBtn.Size = UDim2.new(0.93, 0, 0, 36)
-    TpBtn.Position = UDim2.new(0, 0, 0, posY)
-    TpBtn.Text = islandName -- นำเข้าข้อความชื่อที่มีวงเล็บไทยมาแสดงโดยตรง
-    TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TpBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-    TpBtn.Font = Enum.Font.GothamBold
-    TpBtn.TextSize = 11
-    TpBtn.Parent = Page4_Teleport
-    
-    Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 6)
-    local Stroke = Instance.new("UIStroke", TpBtn)
-    Stroke.Color = Color3.fromRGB(0, 255, 150); Stroke.Thickness = 1 
-
-    TpBtn.MouseButton1Click:Connect(function() TweenToIsland(cframeValue) end)
-end
-
--- เพิ่มวงเล็บภาษาไทยแบบอ่านง่ายสไตล์ ppingyyy Hub เมพๆ!
-CreateIslandTweenButton("🛸 Fly to: Moosewood (เกาะเริ่มต้น)", CFrame.new(374, 140, 248), 5)
-CreateIslandTweenButton("🛸 Fly to: Roslit Bay (เกาะป่าแดง)", CFrame.new(-1462, 140, 715), 46)
-CreateIslandTweenButton("🛸 Fly to: Sunstone Island (เกาะประภาคาร)", CFrame.new(-931, 230, -1004), 87)
-CreateIslandTweenButton("🛸 Fly to: Mushgrove Swamp (เกาะหนองน้ำเห็ด)", CFrame.new(2450, 140, -720), 128)
-CreateIslandTweenButton("🛸 Fly to: Terrapin Island (เกาะเต่า)", CFrame.new(-180, 145, 1950), 169)
-CreateIslandTweenButton("🛸 Fly to: Snowcap Island (เกาะหิมะ)", CFrame.new(2620, 150, 2410), 210)
-CreateIslandTweenButton("🛸 Fly to: Forsaken Shores (เกาะร้างฝั่งตะวันตก)", CFrame.new(-2510, 140, -1680), 251)
-
-print("------- ★ [ppingyyy Hub v2.5] Thai Label Style Successfully Added! ★ -------")
-
+ResetMoveBtn.Text = "🛠️ ฟื้นฟูระบบเดิน/กระโดด (Reset)"; ResetMoveBtn.TextColor3 =
