@@ -1,28 +1,28 @@
--- [[ ppingyyy Hub v1.6 - Ultimate Control Edition ]]
--- เพิ่มระบบหดหน้าต่าง และ ปุ่มลบสคริปต์ระบบคอมเฟิร์มกวนตีน เอาไปยัด GitHub เลยมึง!
+-- [[ ppingyyy Hub v1.9 - Manual Sell & Smooth Combo ]]
+-- ปรับปุ่มขายปลาเป็นแบบกดครั้งเดียวขายหมดตัวทันที ไม่ต้องเปิดออโต้ค้างไว้ เอาไปยัด GitHub เลยมึง!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
--- สั่งลบ GUI ตัวเก่าออกก่อนรันตัวใหม่
+-- ลบ GUI ตัวเก่าออกก่อนรันตัวใหม่
 if CoreGui:FindFirstChild("ppingyyy_MainHub") then
     CoreGui["ppingyyy_MainHub"]:Destroy()
 end
 
--- สร้างหน้าต่างสกรีน GUI
+-- สร้างหน้าต่าง ScreenGui
 local sg = Instance.new("ScreenGui")
 sg.Name = "ppingyyy_MainHub"
 sg.ResetOnSpawn = false
 sg.Parent = CoreGui
 
 -- ====================================================================
--- [1. หน้าต่างหลัก (Main Frame) - ขยายความสูงขึ้นเป็น 320 รองรับปุ่มควบคุม]
+-- [1. หน้าต่างหลัก (Main Frame)]
 -- ====================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 230, 0, 320)
+MainFrame.Size = UDim2.new(0, 350, 0, 260)
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
@@ -41,166 +41,172 @@ MainStroke.Parent = MainFrame
 
 -- หัวข้อสคริปต์
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0.6, 0, 0, 50)
-Title.Position = UDim2.new(0.05, 0, 0, 5)
-Title.Text = "PPINGYYY HUB"
+Title.Size = UDim2.new(0.5, 0, 0, 45)
+Title.Position = UDim2.new(0.04, 0, 0, 0)
+Title.Text = "★ PPINGYYY HUB v1.9"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 15
+Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 Title.Parent = MainFrame
 
--- เส้นคั่นใต้ชื่อสคริปต์
+-- เส้นคั่นบน
 local Divider = Instance.new("Frame")
-Divider.Size = UDim2.new(0.85, 0, 0, 1)
-Divider.Position = UDim2.new(0.075, 0, 0, 50)
+Divider.Size = UDim2.new(0.92, 0, 0, 1)
+Divider.Position = UDim2.new(0.04, 0, 0, 45)
 Divider.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
 Divider.BorderSizePixel = 0
 Divider.Parent = MainFrame
 
--- โฟลเดอร์เก็บปุ่มกดสกิล (เอาไว้ซ่อนตอนหดหน้าต่าง)
-local Container = Instance.new("Frame")
-Container.Name = "Container"
-Container.Size = UDim2.new(1, 0, 1, -50)
-Container.Position = UDim2.new(0, 0, 0, 50)
-Container.BackgroundTransparency = 1
-Container.Parent = MainFrame
+-- แผงเมนูด้านซ้าย (Sidebar) & ขวา (Pages)
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(0, 110, 1, -55)
+TabBar.Position = UDim2.new(0, 10, 0, 50)
+TabBar.BackgroundTransparency = 1
+TabBar.Parent = MainFrame
+
+local PagesArea = Instance.new("Frame")
+PagesArea.Size = UDim2.new(1, -135, 1, -55)
+PagesArea.Position = UDim2.new(0, 125, 0, 50)
+PagesArea.BackgroundTransparency = 1
+PagesArea.Parent = MainFrame
+
+local Page1_Skills = Instance.new("ScrollingFrame")
+Page1_Skills.Size = UDim2.new(1, 0, 1, 0)
+Page1_Skills.BackgroundTransparency = 1
+Page1_Skills.ScrollBarThickness = 0
+Page1_Skills.Visible = true
+Page1_Skills.Parent = PagesArea
+
+local Page2_Fishing = Instance.new("ScrollingFrame")
+Page2_Fishing.Size = UDim2.new(1, 0, 1, 0)
+Page2_Fishing.BackgroundTransparency = 1
+Page2_Fishing.ScrollBarThickness = 0
+Page2_Fishing.Visible = false
+Page2_Fishing.Parent = PagesArea
 
 -- ====================================================================
--- [2. ระบบปุ่มหด/ขยายหน้าต่าง และ ปุ่มลบสคริปต์]
+-- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X] (ลบเลยหุบปาก)]
 -- ====================================================================
--- ปุ่มหดหน้าต่าง [-]
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 25, 0, 25)
-MinBtn.Position = UDim2.new(0.7, 0, 0, 12)
+MinBtn.Position = UDim2.new(0.8, 0, 0, 10)
 MinBtn.Text = "[-]"
 MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 12
 MinBtn.Parent = MainFrame
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
 
-local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(0, 6)
-MinCorner.Parent = MinBtn
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Position = UDim2.new(0.89, 0, 0, 10)
+CloseBtn.Text = "[X]"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Parent = MainFrame
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
 local isMinimized = false
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
-        Container.Visible = false
-        MainFrame.Size = UDim2.new(0, 230, 0, 50) -- หดเหลือแต่แถบบน
+        TabBar.Visible = false; PagesArea.Visible = false
+        MainFrame.Size = UDim2.new(0, 350, 0, 45)
         MinBtn.Text = "[+]"
     else
-        Container.Visible = true
-        MainFrame.Size = UDim2.new(0, 230, 0, 320) -- กางออกเท่าเดิม
+        TabBar.Visible = true; PagesArea.Visible = true
+        MainFrame.Size = UDim2.new(0, 350, 0, 260)
         MinBtn.Text = "[-]"
     end
 end)
 
--- ปุ่มปิด/ลบสคริปต์ [X]
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 25, 0, 25)
-CloseBtn.Position = UDim2.new(0.83, 0, 0, 12)
-CloseBtn.Text = "[X]"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0) -- สีแดง
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 12
-CloseBtn.Parent = MainFrame
-
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
-CloseCorner.Parent = CloseBtn
-
--- หน้าต่างยืนยันการลบ (Confirm Panel)
 local ConfirmPanel = Instance.new("Frame")
-ConfirmPanel.Size = UDim2.new(0.9, 0, 0.75, 0)
-ConfirmPanel.Position = UDim2.new(0.05, 0, 0.2, 0)
+ConfirmPanel.Size = UDim2.new(0.94, 0, 0.75, 0)
+ConfirmPanel.Position = UDim2.new(0.03, 0, 0.2, 0)
 ConfirmPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-ConfirmPanel.BorderSizePixel = 0
-ConfirmPanel.Visible = false -- ซ่อนไว้ก่อน
+ConfirmPanel.Visible = false
 ConfirmPanel.ZIndex = 10
 ConfirmPanel.Parent = MainFrame
+Instance.new("UICorner", ConfirmPanel).CornerRadius = UDim.new(0, 10)
 
-local ConfirmCorner = Instance.new("UICorner")
-ConfirmCorner.CornerRadius = UDim.new(0, 10)
-ConfirmCorner.Parent = ConfirmPanel
-
--- ปุ่มเขียว: แน่ใจนะ?
 local SureBtn = Instance.new("TextButton")
 SureBtn.Size = UDim2.new(0.85, 0, 0, 40)
-SureBtn.Position = UDim2.new(0.075, 0, 0, 40)
+SureBtn.Position = UDim2.new(0.075, 0, 0, 30)
 SureBtn.Text = "มึงแน่ใจใช่ไหมว่าจะลบ?"
 SureBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SureBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0) -- สีเขียว
-SureBtn.Font = Enum.Font.GothamBold
-SureBtn.TextSize = 12
+SureBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 SureBtn.ZIndex = 11
 SureBtn.Parent = ConfirmPanel
+Instance.new("UICorner", SureBtn).CornerRadius = UDim.new(0, 8)
 
-local SureCorner = Instance.new("UICorner")
-SureCorner.CornerRadius = UDim.new(0, 8)
-SureCorner.Parent = SureBtn
-
--- ปุ่มแดง: ลบเลยหุบปาก!!
 local ShutUpBtn = Instance.new("TextButton")
 ShutUpBtn.Size = UDim2.new(0.85, 0, 0, 40)
-ShutUpBtn.Position = UDim2.new(0.075, 0, 0, 110)
+ShutUpBtn.Position = UDim2.new(0.075, 0, 0, 90)
 ShutUpBtn.Text = "ลบเลยหุบปาก"
 ShutUpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ShutUpBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0) -- สีแดงเดือด
-ShutUpBtn.Font = Enum.Font.GothamBold
-ShutUpBtn.TextSize = 13
+ShutUpBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 ShutUpBtn.ZIndex = 11
 ShutUpBtn.Parent = ConfirmPanel
+Instance.new("UICorner", ShutUpBtn).CornerRadius = UDim.new(0, 8)
 
-local ShutUpCorner = Instance.new("UICorner")
-ShutUpCorner.CornerRadius = UDim.new(0, 8)
-ShutUpCorner.Parent = ShutUpBtn
-
--- ปุ่มยกเลิก (เผื่อกดพลาด)
 local CancelBtn = Instance.new("TextButton")
 CancelBtn.Size = UDim2.new(0.85, 0, 0, 30)
-CancelBtn.Position = UDim2.new(0.075, 0, 0, 170)
+CancelBtn.Position = UDim2.new(0.075, 0, 0, 145)
 CancelBtn.Text = "เปลี่ยนใจไม่ลบละ"
 CancelBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
 CancelBtn.BackgroundTransparency = 1
-CancelBtn.Font = Enum.Font.GothamBold
-CancelBtn.TextSize = 11
 CancelBtn.ZIndex = 11
 CancelBtn.Parent = ConfirmPanel
 
--- เปิดหน้าต่างยืนยันตอนกด [X]
 CloseBtn.MouseButton1Click:Connect(function()
     if isMinimized then
-        -- ถ้าหดหน้าต่างอยู่ ให้กางออกก่อนเพื่อให้เห็นเมนูยืนยัน
-        Container.Visible = true
-        MainFrame.Size = UDim2.new(0, 230, 0, 320)
-        MinBtn.Text = "[-]"
-        isMinimized = false
+        TabBar.Visible = true; PagesArea.Visible = true
+        MainFrame.Size = UDim2.new(0, 350, 0, 260)
+        MinBtn.Text = "[-]"; isMinimized = false
     end
     ConfirmPanel.Visible = true
 end)
-
-CancelBtn.MouseButton1Click:Connect(function()
-    ConfirmPanel.Visible = false
-end)
-
--- ลอจิกการทำลายสคริปต์ทิ้ง (ใช้กับทั้งสองปุ่มลบ)
-local function DestroyHub()
-    sg:Destroy()
-    print("------- ppingyyy Hub Closed and Destroyed! -------")
-end
-
+CancelBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = false end)
+local function DestroyHub() sg:Destroy() end
 SureBtn.MouseButton1Click:Connect(DestroyHub)
 ShutUpBtn.MouseButton1Click:Connect(DestroyHub)
 
 -- ====================================================================
--- [3. ส่วนของระบบทำงาน (Logic & Random Combo)]
+-- [3. ฟังก์ชันสลับหน้า Tab]
+-- ====================================================================
+local function CreateTabButton(name, posY, targetPage)
+    local TBtn = Instance.new("TextButton")
+    TBtn.Size = UDim2.new(1, 0, 0, 35)
+    TBtn.Position = UDim2.new(0, 0, 0, posY)
+    TBtn.Text = name
+    TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TBtn.BackgroundColor3 = (targetPage.Visible and Color3.fromRGB(40, 40, 45)) or Color3.fromRGB(25, 25, 30)
+    TBtn.Font = Enum.Font.GothamBold
+    TBtn.TextSize = 11
+    TBtn.Parent = TabBar
+    Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
+
+    TBtn.MouseButton1Click:Connect(function()
+        Page1_Skills.Visible = false; Page2_Fishing.Visible = false
+        targetPage.Visible = true
+        for _, v in pairs(TabBar:GetChildren()) do
+            if v:IsA("TextButton") then v.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end
+        end
+        TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+    end)
+end
+
+CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
+CreateTabButton("🎣 ออโต้ตกปลา", 45, Page2_Fishing)
+
+-- ====================================================================
+-- [4. ระบบทำงานหลังบ้าน (สับสกิลสุ่ม + ล็อกเกจ)]
 -- ====================================================================
 local SkillStates = { Z = false, X = false, C = false, V = false }
+local AutoCatchEnabled = false
 
 local function PressKey(keyStr)
     local keyCode = Enum.KeyCode[keyStr]
@@ -211,68 +217,128 @@ local function PressKey(keyStr)
     end
 end
 
+-- ฟังก์ชันยิงรีโมทขายปลาทันที (เรียกใช้ตอนกดปุ่มแมนนวล)
+local function SellFishNow()
+    pcall(function()
+        local sellRemote = game:GetService("ReplicatedStorage"):FindFirstChild("SellFish", true) or 
+                           game:GetService("ReplicatedStorage"):FindFirstChild("Sell", true) or
+                           game:GetService("ReplicatedStorage"):FindFirstChild("SellItems", true)
+        if sellRemote and (sellRemote:IsA("RemoteEvent") or sellRemote:IsA("RemoteFunction")) then
+            sellRemote:FireServer()
+        end
+    end)
+end
+
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(0.1)
+        
+        -- ลอจิก V นำร่อง
+        if SkillStates["V"] then
+            pcall(function() PressKey("V") end)
+            task.wait(0.5)
+        end
+        
+        -- ลอจิกสุ่มปุ่มที่เหลือ
         local activeSkills = {}
         for key, isEnabled in pairs(SkillStates) do
             if isEnabled and key ~= "V" then table.insert(activeSkills, key) end
         end
-        if SkillStates["V"] then
-            pcall(function() PressKey("V") end)
-            task.wait(0.3)
-        end
+        
         if #activeSkills > 0 then
             pcall(function()
                 local randomIndex = math.random(1, #activeSkills)
                 PressKey(activeSkills[randomIndex])
+            end)
+            task.wait(0.4)
+        end
+
+        -- บอทตกปลาล็อกเกจตรงกลาง
+        if AutoCatchEnabled then
+            pcall(function()
+                local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+                if playerGui then
+                    for _, v in pairs(playerGui:GetDescendants()) do
+                        if v.Name == "Bar" or v.Name == "GreenBar" or v.Name == "FishingBar" then
+                            if v:IsA("GuiObject") then
+                                v.Position = UDim2.new(0.5, 0, v.Position.Y.Scale, v.Position.Y.Offset)
+                            end
+                        end
+                    end
+                end
             end)
         end
     end
 end)
 
 -- ====================================================================
--- [4. ฟังก์ชันสร้างปุ่มกดสกิล (ยัดลง Container เพื่อให้หดซ่อนได้)]
+-- [5. ฟังก์ชันสร้างปุ่มตัวเลือกฟังก์ชันภายในหน้า Page]
 -- ====================================================================
-local function CreateButton(keyName, posY)
+local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCallback)
     local Btn = Instance.new("TextButton")
-    Btn.Name = "Btn_" .. keyName
-    Btn.Size = UDim2.new(0.85, 0, 0, 40)
-    Btn.Position = UDim2.new(0.075, 0, 0, posY)
-    Btn.Text = "AUTO " .. keyName .. " : OFF"
+    Btn.Size = UDim2.new(0.95, 0, 0, 38)
+    Btn.Position = UDim2.new(0, 0, 0, posY)
+    Btn.Text = (isSkill and ("AUTO " .. keyName .. " : OFF")) or (keyName .. " : OFF")
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255) 
     Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 13
-    Btn.Parent = Container -- ยัดเข้า Container
+    Btn.TextSize = 12
+    Btn.Parent = parentPage
 
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 8)
-    BtnCorner.Parent = Btn
-
-    local TextStroke = Instance.new("UIStroke")
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    local TextStroke = Instance.new("UIStroke", Btn)
     TextStroke.Color = Color3.fromRGB(0, 0, 0)
     TextStroke.Thickness = 1.2
-    TextStroke.Parent = Btn
 
     Btn.MouseButton1Click:Connect(function()
-        SkillStates[keyName] = not SkillStates[keyName]
-        if SkillStates[keyName] then
-            Btn.Text = "AUTO " .. keyName .. " : ON"
+        local state = toggleCallback()
+        if state then
+            Btn.Text = (isSkill and ("AUTO " .. keyName .. " : ON")) or (keyName .. " : ON")
             Btn.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
             TextStroke.Enabled = false 
         else
-            Btn.Text = "AUTO " .. keyName .. " : OFF"
+            Btn.Text = (isSkill and ("AUTO " .. keyName .. " : OFF")) or (keyName .. " : OFF")
             Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             TextStroke.Enabled = true 
         end
     end)
 end
 
--- สร้างปุ่มสกิล
-CreateButton("Z", 15)
-CreateButton("X", 65)
-CreateButton("C", 115)
-CreateButton("V", 165)
+-- สร้างปุ่มสกิลหน้า 1
+CreateFunctionButton("Z", 5, Page1_Skills, true, function() SkillStates.Z = not SkillStates.Z return SkillStates.Z end)
+CreateFunctionButton("X", 50, Page1_Skills, true, function() SkillStates.X = not SkillStates.X return SkillStates.X end)
+CreateFunctionButton("C", 95, Page1_Skills, true, function() SkillStates.C = not SkillStates.C return SkillStates.C end)
+CreateFunctionButton("V", 140, Page1_Skills, true, function() SkillStates.V = not SkillStates.V return SkillStates.V end)
 
-print("------- ★ [ppingyyy Hub v1.6] Ultimate Version Loaded! ★ -------")
+-- สร้างปุ่มตกปลาหน้า 2 (ล็อกเกจ)
+CreateFunctionButton("ล็อกเกจตรงกลาง (Auto Catch)", 5, Page2_Fishing, false, function() AutoCatchEnabled = not AutoCatchEnabled return AutoCatchEnabled end)
+
+-- --- [สร้างปุ่มแบบแมนนวลพิเศษ: กดปุ๊บขายปลาหมดตัวทันที] ---
+local ManualSellBtn = Instance.new("TextButton")
+ManualSellBtn.Size = UDim2.new(0.95, 0, 0, 38)
+ManualSellBtn.Position = UDim2.new(0, 0, 0, 50)
+ManualSellBtn.Text = "💰 ขายปลาทั้งหมดทันที"
+ManualSellBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ManualSellBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100) -- สีเขียวมรกตค้าขายร่ำรวย
+ManualSellBtn.Font = Enum.Font.GothamBold
+ManualSellBtn.TextSize = 12
+ManualSellBtn.Parent = Page2_Fishing
+
+Instance.new("UICorner", ManualSellBtn).CornerRadius = UDim.new(0, 6)
+local SellStroke = Instance.new("UIStroke", ManualSellBtn)
+SellStroke.Color = Color3.fromRGB(0, 0, 0)
+SellStroke.Thickness = 1.2
+
+-- ลอจิกกดคลิกเดียวขายเกลี้ยงตู้
+ManualSellBtn.MouseButton1Click:Connect(function()
+    SellFishNow() -- สั่งยิงคำสั่งขายทันที
+    
+    -- ทำวิชวลปุ่มกระพริบสีแดงแป๊บนึงให้รู้ว่ากดติดแล้ว 555
+    ManualSellBtn.Text = "✔ ขายสำเร็จแล้ว!"
+    ManualSellBtn.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+    task.wait(0.5)
+    ManualSellBtn.Text = "💰 ขายปลาทั้งหมดทันที"
+    ManualSellBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100)
+end)
+
+print("------- ★ [ppingyyy Hub v1.9] Manual Sell Updated! ★ -------")
