@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v2.5 - Center Island Landing Fix ]]
--- แก้ไขพิกัดปุ่มหน้า 4 ใหม่ทั้งหมด ย้ายจุดแลนดิ้งขยับลึกเข้ากึ่งกลางเกาะ + เพิ่มความสูงกันร่วงลงน้ำทะเล!
+-- [[ ppingyyy Hub v2.7 - Boss Farm Update ]]
+-- เพิ่มระบบฟาร์มบอสอัตโนมัติ (Auto Farm Boss) ที่หน้า 3 ฟาร์มเนียนๆ อยู่เหนือหัวบอส!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -7,7 +7,6 @@ local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local TweenService = game:GetService("TweenService")
 
 local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
@@ -27,7 +26,7 @@ sg.Parent = CoreGui
 -- ====================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 290)
+MainFrame.Size = UDim2.new(0, 400, 0, 260) -- ปรับขนาดขยายขึ้นเล็กน้อยรองรับปุ่มบอส
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
@@ -47,7 +46,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v2.5"
+Title.Text = "★ PPINGYYY HUB v2.7"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -88,12 +87,7 @@ Page2_Fishing.Visible = false; Page2_Fishing.Parent = PagesArea
 local Page3_Utils = Instance.new("ScrollingFrame")
 Page3_Utils.Size = UDim2.new(1, 0, 1, 0)
 Page3_Utils.BackgroundTransparency = 1; Page3_Utils.ScrollBarThickness = 3
-Page3_Utils.CanvasSize = UDim2.new(0, 0, 0, 200); Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
-
-local Page4_Teleport = Instance.new("ScrollingFrame")
-Page4_Teleport.Size = UDim2.new(1, 0, 1, 0)
-Page4_Teleport.BackgroundTransparency = 1; Page4_Teleport.ScrollBarThickness = 3
-Page4_Teleport.CanvasSize = UDim2.new(0, 0, 0, 320); Page4_Teleport.Visible = false; Page4_Teleport.Parent = PagesArea
+Page3_Utils.CanvasSize = UDim2.new(0, 0, 0, 240); Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
 
 -- ====================================================================
 -- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X]]
@@ -127,7 +121,7 @@ MinBtn.MouseButton1Click:Connect(function()
         MinBtn.Text = "[+]"
     else
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 400, 0, 290)
+        MainFrame.Size = UDim2.new(0, 400, 0, 260)
         MinBtn.Text = "[-]"
     end
 end)
@@ -167,7 +161,7 @@ CancelBtn.BackgroundTransparency = 1; CancelBtn.ZIndex = 11; CancelBtn.Parent = 
 CloseBtn.MouseButton1Click:Connect(function()
     if isMinimized then
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 400, 0, 290)
+        MainFrame.Size = UDim2.new(0, 400, 0, 260)
         MinBtn.Text = "[-]"; isMinimized = false
     end
     ConfirmPanel.Visible = true
@@ -193,7 +187,7 @@ local function CreateTabButton(name, posY, targetPage)
     Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
 
     TBtn.MouseButton1Click:Connect(function()
-        Page1_Skills.Visible = false; Page2_Fishing.Visible = false; Page3_Utils.Visible = false; Page4_Teleport.Visible = false
+        Page1_Skills.Visible = false; Page2_Fishing.Visible = false; Page3_Utils.Visible = false
         targetPage.Visible = true
         for _, v in pairs(TabBar:GetChildren()) do
             if v:IsA("TextButton") then v.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end
@@ -205,7 +199,6 @@ end
 CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
 CreateTabButton("🎣 ออโต้ตกปลา", 42, Page2_Fishing)
 CreateTabButton("🛠️ อำนวยความสะดวก", 79, Page3_Utils)
-CreateTabButton("🏝️ บินเนียนไปเกาะ", 116, Page4_Teleport)
 
 -- ====================================================================
 -- [4. ระบบทำงานหลังบ้าน (Backend)]
@@ -213,10 +206,10 @@ CreateTabButton("🏝️ บินเนียนไปเกาะ", 116, Page4
 local SkillStates = { Z = false, X = false, C = false, V = false }
 getgenv().PPINGYYY_AutoCast = false 
 getgenv().PPINGYYY_Anchor = false   
+getgenv().PPINGYYY_AutoBoss = false -- สถานะระบบออโต้บอส
 
 local ClimbWallEnabled = false
 local NoclipEnabled = false
-local IsTweening = false 
 
 local function PressKey(keyStr)
     local keyCode = Enum.KeyCode[keyStr]
@@ -227,39 +220,6 @@ local function PressKey(keyStr)
             VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
         end)
     end
-end
-
-local function TweenToIsland(targetCFrame)
-    local char = LocalPlayer.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not hum or IsTweening then return end
-
-    IsTweening = true
-    
-    local currentPos = hrp.Position
-    local targetPos = targetCFrame.Position
-    local distance = (currentPos - targetPos).Magnitude
-    local speed = 86 
-    local duration = distance / speed
-
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bodyVelocity.Parent = hrp
-
-    hum.PlatformStand = true
-
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-    
-    tween:Play()
-    tween.Completed:Wait()
-
-    bodyVelocity:Destroy()
-    hum.PlatformStand = false
-    IsTweening = false
 end
 
 -- ลูปคุมออโต้สกิล
@@ -313,11 +273,50 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ลูปคุมระบบหน้า 3
+-- ลูปคุมระบบหน้า 3 + ลูปออโต้ฟาร์มบอส
 RunService.Stepped:Connect(function()
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
     local hrp = char.HumanoidRootPart
+
+    -- ระบบฟาร์มบอส (หาเป้าหมายและล็อกพิกัดเหนือหัวบอส 8 บล็อก)
+    if getgenv().PPINGYYY_AutoBoss then
+        pcall(function()
+            local targetBoss = nil
+            -- ค้นหาบอสใน Workspace (สแกนหาโมเดลที่มีคำว่า Boss หรือ Monster หรือเอาตัวที่มีเลือดยกเว้นผู้เล่น)
+            for _, v in pairs(workspace:GetChildren()) do
+                if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChildOfClass("Humanoid") then
+                    if string.match(string.lower(v.Name), "boss") or string.match(string.lower(v.Name), "monster") or v.Name == "Boss" then
+                        if v:FindFirstChildOfClass("Humanoid").Health > 0 then
+                            targetBoss = v
+                            break
+                        end
+                    end
+                end
+            end
+            
+            -- ถ้าระบบออโต้สแกนไม่เจอ ให้ลองหาโฟลเดอร์มอนสเตอร์ทั่วไป
+            if not targetBoss and workspace:FindFirstChild("Monsters") then
+                for _, v in pairs(workspace.Monsters:GetChildren()) do
+                    if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChildOfClass("Humanoid") and v:FindFirstChildOfClass("Humanoid").Health > 0 then
+                        targetBoss = v
+                        break
+                    end
+                end
+            end
+
+            -- ถ้าเจอเจ้านายใหญ่ปุ๊บ ทำการวาร์ปไปขี่คอทุบทันที!
+            if targetBoss then
+                hrp.Velocity = Vector3.new(0, 0, 0)
+                -- ล็อกตำแหน่งตัวเราให้อยู่ "เหนือหัวบอส" ขยับขึ้นไปข้างบน 8 บล็อก กันโดนดาเมจตบสวนสวนสวน
+                hrp.CFrame = targetBoss.HumanoidRootPart.CFrame * CFrame.new(0, 8, 0)
+                
+                -- สั่งคลิกซ้ายโจมตีออโต้รัวๆ
+                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+            end
+        end)
+    end
 
     if ClimbWallEnabled then
         pcall(function()
@@ -382,18 +381,20 @@ Instance.new("UICorner", ManualSellBtn).CornerRadius = UDim.new(0, 6)
 Instance.new("UIStroke", ManualSellBtn).Color = Color3.fromRGB(0, 0, 0)
 ManualSellBtn.MouseButton1Click:Connect(function() pcall(function() ReplicatedStorage.Events.SellFish:FireServer("All") end) end)
 
-CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 5, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
-CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 46, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
+-- หน้า 3: เพิ่มปุ่มฟาร์มบอสตัวตึงเข้าไปแถวบนสุด!
+CreateFunctionButton("ฟาร์มบอสอัตโนมัติ (Auto Farm Boss)", 5, Page3_Utils, false, function() getgenv().PPINGYYY_AutoBoss = not getgenv().PPINGYYY_AutoBoss return getgenv().PPINGYYY_AutoBoss end)
+CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 46, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
+CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 87, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
 
 local FlyScriptBtn = Instance.new("TextButton")
-FlyScriptBtn.Size = UDim2.new(0.93, 0, 0, 36); FlyScriptBtn.Position = UDim2.new(0, 0, 0, 87)
+FlyScriptBtn.Size = UDim2.new(0.93, 0, 0, 36); FlyScriptBtn.Position = UDim2.new(0, 0, 0, 128)
 FlyScriptBtn.Text = "🚀 เปิดสคริปต์บิน FLY GUI V11"; FlyScriptBtn.TextColor3 = Color3.fromRGB(255, 255, 255); FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)
 FlyScriptBtn.Font = Enum.Font.GothamBold; FlyScriptBtn.TextSize = 11; FlyScriptBtn.Parent = Page3_Utils
 Instance.new("UICorner", FlyScriptBtn).CornerRadius = UDim.new(0, 6)
 FlyScriptBtn.MouseButton1Click:Connect(function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))() end) end)
 
 local ResetMoveBtn = Instance.new("TextButton")
-ResetMoveBtn.Size = UDim2.new(0.93, 0, 0, 36); ResetMoveBtn.Position = UDim2.new(0, 0, 0, 128)
+ResetMoveBtn.Size = UDim2.new(0.93, 0, 0, 36); ResetMoveBtn.Position = UDim2.new(0, 0, 0, 169)
 ResetMoveBtn.Text = "🛠️ ฟื้นฟูระบบเดิน/กระโดด (Reset)"; ResetMoveBtn.TextColor3 = Color3.fromRGB(255, 255, 255); ResetMoveBtn.BackgroundColor3 = Color3.fromRGB(230, 100, 0)
 ResetMoveBtn.Font = Enum.Font.GothamBold; ResetMoveBtn.TextSize = 11; ResetMoveBtn.Parent = Page3_Utils
 Instance.new("UICorner", ResetMoveBtn).CornerRadius = UDim.new(0, 6)
@@ -408,34 +409,5 @@ ResetMoveBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ====================================================================
--- [6. ระบบสร้างปุ่มบินแบบเนียนหน้า 4 - อัปเดตพิกัดใจกลางเกาะ (Center Fixed)]
--- ====================================================================
-local function CreateIslandTweenButton(islandName, cframeValue, posY)
-    local TpBtn = Instance.new("TextButton")
-    TpBtn.Size = UDim2.new(0.93, 0, 0, 36)
-    TpBtn.Position = UDim2.new(0, 0, 0, posY)
-    TpBtn.Text = islandName 
-    TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TpBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-    TpBtn.Font = Enum.Font.GothamBold
-    TpBtn.TextSize = 11
-    TpBtn.Parent = Page4_Teleport
-    
-    Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 6)
-    local Stroke = Instance.new("UIStroke", TpBtn)
-    Stroke.Color = Color3.fromRGB(0, 255, 150); Stroke.Thickness = 1 
+print("------- ★ [ppingyyy Hub v2.7] Boss Farm Update Successfully Added! ★ -------")
 
-    TpBtn.MouseButton1Click:Connect(function() TweenToIsland(cframeValue) end)
-end
-
--- ปรับพิกัดขยับเข้าหาใจกลางแผ่นดินของเกาะแต่ละเกาะ + ยกความสูงแกน Y เป็น 155-245 ปลอดภัย 100%
-CreateIslandTweenButton("🛸 Fly to: Moosewood (เกาะเริ่มต้น)", CFrame.new(383, 142, 255), 5)
-CreateIslandTweenButton("🛸 Fly to: Roslit Bay (เกาะป่าแดง)", CFrame.new(-1475, 145, 730), 46)
-CreateIslandTweenButton("🛸 Fly to: Sunstone Island (เกาะประภาคาร)", CFrame.new(-940, 235, -990), 87)
-CreateIslandTweenButton("🛸 Fly to: Mushgrove Swamp (เกาะหนองน้ำเห็ด)", CFrame.new(2465, 145, -705), 128)
-CreateIslandTweenButton("🛸 Fly to: Terrapin Island (เกาะเต่า)", CFrame.new(-195, 150, 1965), 169)
-CreateIslandTweenButton("🛸 Fly to: Snowcap Island (เกาะหิมะ)", CFrame.new(2635, 155, 2420), 210)
-CreateIslandTweenButton("🛸 Fly to: Forsaken Shores (เกาะร้างฝั่งตะวันตก)", CFrame.new(-2525, 145, -1665), 251)
-
-print("------- ★ [ppingyyy Hub v2.5] Center Island Landing Fixed! ★ -------")
