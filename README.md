@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v2.0 - Fly Direction Fixed ]]
--- แก้ไขระบบบินกลับด้าน (เดินหน้า=ไปข้างหน้า / ถอยหลัง=ไปข้างหลัง) เรียบร้อย! เวอร์ชันคลีน v2.0 ตามสั่ง
+-- [[ ppingyyy Hub v2.0 - Ultimate Fishing & Fly Integration ]]
+-- แก้ไขบั๊กตัวแข็งหลังตกปลาเสร็จเด็ดขาด + ฝัง loadstring สคริปต์บินนอกตามสั่ง!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -7,7 +7,6 @@ local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local Workspace = game:GetService("Workspace")
 
 local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
@@ -97,7 +96,7 @@ Page3_Utils.Visible = false
 Page3_Utils.Parent = PagesArea
 
 -- ====================================================================
--- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X] (ลบเลยหุบปาก)]
+-- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X]]
 -- ====================================================================
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 25, 0, 25)
@@ -221,7 +220,6 @@ getgenv().PPINGYYY_Anchor = false
 getgenv().PPINGYYY_AutoCast = false 
 
 local ClimbWallEnabled = false
-local FlyEnabled = false
 local NoclipEnabled = false
 
 local function PressKey(keyStr)
@@ -263,6 +261,7 @@ task.spawn(function()
             pcall(function()
                 local char = LocalPlayer.Character
                 if char then
+                    -- ปรับเงื่อนไขให้ฉลาดขึ้น ตรวจจับตัวละครเสร็จงานแล้วปล่อยให้ขยับอิสระ
                     if not char:GetAttribute("Fishing") and not MainGui.Fishing.Visible then
                         ReplicatedStorage.Events.Fishing:FireServer()
                     end
@@ -272,38 +271,41 @@ task.spawn(function()
     end
 end)
 
--- ลูปย้ายเกจเขียวมาตรงกลางจอ ไม่บล็อกปุ่มเดิน
+-- **[ลูปย้ายเกจเขียว - แก้บั๊กตัวแข็งหลังตกปลาเสร็จเด็ดขาด!]**
 RunService.RenderStepped:Connect(function()
     if getgenv().PPINGYYY_Anchor then
-        pcall(function()
-            local fishingUI = MainGui.Fishing
-            if fishingUI.Visible then
-                local bar = fishingUI.BarFrame.Bar
-                bar.Position = UDim2.new(0.5, 0, bar.Position.Y.Scale, 0)
-                
-                if math.random(1, 3) == 1 then
-                    ReplicatedStorage.Fishing:FireServer("1")
+        local success, err = pcall(function()
+            local fishingUI = MainGui:FindFirstChild("Fishing")
+            -- ตรวจสอบให้มั่นใจว่าหน้าต่างมินิเกมยังเปิดคาจออยู่ ถึงจะรันบอทดึงเกจ
+            if fishingUI and fishingUI.Visible then
+                local barFrame = fishingUI:FindFirstChild("BarFrame")
+                if barFrame and barFrame:FindFirstChild("Bar") then
+                    local bar = barFrame.Bar
+                    bar.Position = UDim2.new(0.5, 0, bar.Position.Y.Scale, 0)
+                    
+                    -- หน่วงค่าการส่งแบบสุ่มความถี่ ไม่รัวจนเซิร์ฟเวอร์ดักแช่แข็งตัวละครมึง
+                    if math.random(1, 4) == 1 then
+                        ReplicatedStorage.Fishing:FireServer("1")
+                    end
                 end
             end
         end)
     end
 end)
 
--- ลูปคุมระบบหน้า 3 (ปีน, ทะลุกำแพง, บิน)
-local flyBodyVelocity
+-- ลูปคุมระบบหน้า 3 (ปีน, ทะลุกำแพง)
 RunService.Stepped:Connect(function()
     local char = LocalPlayer.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not hum then return end
+    if not hrp then return end
 
     if ClimbWallEnabled then
         pcall(function()
             local raycastParams = RaycastParams.new()
             raycastParams.FilterDescendantsInstances = {char}
             raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-            local raycastResult = Workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 2.5, raycastParams)
+            local raycastResult = workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 2.5, raycastParams)
             if raycastResult and raycastResult.Instance then
                 hrp.Velocity = Vector3.new(hrp.Velocity.X, 45, hrp.Velocity.Z)
             end
@@ -314,27 +316,6 @@ RunService.Stepped:Connect(function()
         for _, part in pairs(char:GetChildren()) do
             if part:IsA("BasePart") then part.CanCollide = false end
         end
-    end
-
-    -- **[ระบบบินแก้ทิศทางกลับด้าน เรียบร้อย!]**
-    if FlyEnabled then
-        pcall(function()
-            if not flyBodyVelocity then
-                flyBodyVelocity = Instance.new("BodyVelocity")
-                flyBodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                flyBodyVelocity.Parent = hrp
-            end
-            local camera = Workspace.CurrentCamera
-            local moveDirection = hum.MoveDirection
-            if moveDirection.Magnitude > 0 then
-                -- แก้ลอจิกจาก -moveDirection.Z เป็น moveDirection.Z เพื่อให้ปุ่มคุมตรงตามจริง
-                flyBodyVelocity.Velocity = camera.CFrame:VectorToWorldSpace(Vector3.new(moveDirection.X, 0, moveDirection.Z).Unit * 50)
-            else
-                flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            end
-        end)
-    else
-        if flyBodyVelocity then flyBodyVelocity:Destroy() flyBodyVelocity = nil end
     end
 end)
 
@@ -388,7 +369,7 @@ CreateFunctionButton("ล็อกเกจตรงกลาง (Auto Catch)", 
     return getgenv().PPINGYYY_Anchor 
 end)
 
--- ปุ่มแมนนวลขายปลา
+-- ปุ่มขายปลา
 local ManualSellBtn = Instance.new("TextButton")
 ManualSellBtn.Size = UDim2.new(0.93, 0, 0, 38)
 ManualSellBtn.Position = UDim2.new(0, 0, 0, 95)
@@ -414,8 +395,36 @@ end)
 
 -- ปุ่มหน้า 3 (อำนวยความสะดวก)
 CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 5, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
-CreateFunctionButton("ระบบบินร่อนกลางเวหา (Fly)", 50, Page3_Utils, false, function() FlyEnabled = not FlyEnabled return FlyEnabled end)
-CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 95, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
+CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 50, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
 
-print("------- ★ [ppingyyy Hub v2.0] Fly Inversion Fixed Successfully! ★ -------")
+-- **[ปุ่มเรียกใช้สคริปต์บินมหาเทพภายนอกตามที่มึงขอ]**
+local FlyScriptBtn = Instance.new("TextButton")
+FlyScriptBtn.Size = UDim2.new(0.93, 0, 0, 38)
+FlyScriptBtn.Position = UDim2.new(0, 0, 0, 95)
+FlyScriptBtn.Text = "🚀 เปิดสคริปต์บิน FLY GUI V11"
+FlyScriptBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)
+FlyScriptBtn.Font = Enum.Font.GothamBold
+FlyScriptBtn.TextSize = 12
+FlyScriptBtn.Parent = Page3_Utils
+Instance.new("UICorner", FlyScriptBtn).CornerRadius = UDim.new(0, 6)
+local FlyStroke = Instance.new("UIStroke", FlyScriptBtn)
+FlyStroke.Color = Color3.fromRGB(0, 0, 0)
+FlyStroke.Thickness = 1.2
+
+FlyScriptBtn.MouseButton1Click:Connect(function()
+    FlyScriptBtn.Text = "⏳ กำลังรันสคริปต์บิน..."
+    FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+    
+    -- รัน loadstring สคริปต์บิน Universal ตัวแรงที่มึงสั่งโดยตรง
+    pcall(function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))()
+    end)
+    
+    task.wait(1)
+    FlyScriptBtn.Text = "🚀 เปิดสคริปต์บิน FLY GUI V11"
+    FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)
+end)
+
+print("------- ★ [ppingyyy Hub v2.0] Ultimate Fly & Freeze Fix Loaded! ★ -------")
 
