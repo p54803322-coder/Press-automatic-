@@ -1,123 +1,67 @@
--- [[ PPINGYYY HUB - STABLE VERSION ]]
+-- [[ ⚡ p p i n g y y y  H u b - v 5.0 (SPECIAL TAB ADDED) ⚡ ]]
 local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local TweenService = game:GetService("TweenService")
 
--- 1. ลบของเก่าออกก่อนรัน
-if CoreGui:FindFirstChild("ppingyyy_Hub") then 
-    CoreGui["ppingyyy_Hub"]:Destroy() 
-end
+if CoreGui:FindFirstChild("ppingyyy_Hub") then CoreGui["ppingyyy_Hub"]:Destroy() end
 
--- 2. สร้าง ScreenGui
 local sg = Instance.new("ScreenGui", CoreGui)
 sg.Name = "ppingyyy_Hub"
 
+-- [Loader]
+local LoadFrame = Instance.new("Frame", sg)
+LoadFrame.Size = UDim2.new(0, 300, 0, 80); LoadFrame.Position = UDim2.new(0.5, -150, 0.5, -40)
+LoadFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40); Instance.new("UICorner", LoadFrame)
+local BarBG = Instance.new("Frame", LoadFrame); BarBG.Size = UDim2.new(0.9, 0, 0, 10); BarBG.Position = UDim2.new(0.05, 0, 0.6, 0)
+BarBG.BackgroundColor3 = Color3.fromRGB(50, 50, 60); Instance.new("UICorner", BarBG)
+local BarFill = Instance.new("Frame", BarBG); BarFill.Size = UDim2.new(0, 0, 1, 0); BarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 150); Instance.new("UICorner", BarFill)
+
+-- [Main Menu]
 local Main = Instance.new("Frame", sg)
-Main.Size = UDim2.new(0, 200, 0, 300)
-Main.Position = UDim2.new(0.05, 0, 0.4, 0)
-Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-Main.Active = true
-Main.Draggable = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+Main.Size = UDim2.new(0, 300, 0, 380); Main.Position = UDim2.new(0.5, -150, 0.4, 0)
+Main.BackgroundColor3 = Color3.fromRGB(30, 30, 40); Main.Active = true; Main.Draggable = true
+Main.Visible = false; Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
 
--- 3. ปุ่มจัดการหน้าจอ
-local MinBtn = Instance.new("TextButton", Main)
-MinBtn.Size = UDim2.new(0, 30, 0, 30); MinBtn.Position = UDim2.new(0.65, 0, 0, 5)
-MinBtn.Text = "-"; MinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45); MinBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", MinBtn)
-
-local CloseBtn = Instance.new("TextButton", Main)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30); CloseBtn.Position = UDim2.new(0.82, 0, 0, 5)
-CloseBtn.Text = "X"; CloseBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); CloseBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", CloseBtn)
-
--- ฟังก์ชันสร้างปุ่ม (แบบปลอดภัย)
-local function CreateBtn(text, pos, callback)
-    local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0.85, 0, 0, 30); btn.Position = UDim2.new(0.075, 0, 0, pos)
-    btn.Text = text; btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45); btn.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", btn)
-    btn.MouseButton1Click:Connect(function() callback(btn) end)
+-- [Logic ระบบ Tab]
+local function CreateTab()
+    local t = Instance.new("ScrollingFrame", Main)
+    t.Size = UDim2.new(0.9, 0, 0.6, 0); t.Position = UDim2.new(0.05, 0, 0.2, 0)
+    t.BackgroundTransparency = 1; t.Visible = false
+    return t
 end
 
--- 4. ระบบการทำงาน
-getgenv().AutoCast = false
-getgenv().AutoCatch = false
-getgenv().RandomSkill = false
-getgenv().Noclip = false
+local Tab1 = CreateTab(); Tab1.Visible = true -- 🐟
+local Tab2 = CreateTab() -- ✨
+local Tab3 = CreateTab() -- ⚙️
+local Tab4 = CreateTab() -- 🎁 Special
 
-CreateBtn("🎣 Auto Cast: OFF", 40, function(btn) 
-    getgenv().AutoCast = not getgenv().AutoCast
-    btn.Text = getgenv().AutoCast and "🎣 Auto Cast: ON" or "🎣 Auto Cast: OFF"
-    if getgenv().AutoCast then
-        task.spawn(function() 
-            while getgenv().AutoCast do 
-                task.wait(1.5)
-                local char = lp.Character
-                if char and not char:GetAttribute("Fishing") and RS:FindFirstChild("Events") then 
-                    RS.Events.Fishing:FireServer() 
-                end
-            end
-        end)
-    end
+-- [Coming Soon สำหรับ Tab พิเศษ]
+local SpecialText = Instance.new("TextLabel", Tab4)
+SpecialText.Size = UDim2.new(1, 0, 1, 0); SpecialText.Text = "COMING SOON"
+SpecialText.TextColor3 = Color3.fromRGB(255, 215, 0); SpecialText.BackgroundTransparency = 1
+SpecialText.Font = Enum.Font.GothamBold; SpecialText.TextSize = 30
+
+-- [Tab Bar]
+local TabBar = Instance.new("Frame", Main); TabBar.Size = UDim2.new(0.9, 0, 0, 40); TabBar.Position = UDim2.new(0.05, 0, 0.85, 0); TabBar.BackgroundTransparency = 1
+local function MakeTabBtn(txt, t, pos)
+    local b = Instance.new("TextButton", TabBar); b.Size = UDim2.new(0.22, 0, 1, 0); b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+    b.Position = pos; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function()
+        TweenService:Create(b, TweenInfo.new(0.1), {Size = UDim2.new(0.25, 0, 1.2, 0)}):Play()
+        task.wait(0.1); TweenService:Create(b, TweenInfo.new(0.1), {Size = UDim2.new(0.22, 0, 1, 0)}):Play()
+        Tab1.Visible=(t==Tab1); Tab2.Visible=(t==Tab2); Tab3.Visible=(t==Tab3); Tab4.Visible=(t==Tab4)
+    end)
+end
+MakeTabBtn("🐟", Tab1, UDim2.new(0,0,0,0)); MakeTabBtn("✨", Tab2, UDim2.new(0.26,0,0,0)); MakeTabBtn("⚙️", Tab3, UDim2.new(0.52,0,0,0)); MakeTabBtn("🎁", Tab4, UDim2.new(0.78,0,0,0))
+
+-- [Logic Animation & Loading]
+task.spawn(function()
+    TweenService:Create(BarFill, TweenInfo.new(3), {Size = UDim2.new(1, 0, 1, 0)}):Play()
+    task.wait(3); LoadFrame:Destroy(); Main.Visible = true
 end)
 
-CreateBtn("🎯 Auto Catch: OFF", 75, function(btn) 
-    getgenv().AutoCatch = not getgenv().AutoCatch
-    btn.Text = getgenv().AutoCatch and "🎯 Auto Catch: ON" or "🎯 Auto Catch: OFF"
-end)
+-- [ส่วนปุ่ม] - ใส่เพิ่มเข้าไปเองได้เลยตามหมวดหมู่!
 
-CreateBtn("✨ Random Skill: OFF", 110, function(btn) 
-    getgenv().RandomSkill = not getgenv().RandomSkill
-    btn.Text = getgenv().RandomSkill and "✨ Random Skill: ON" or "✨ Random Skill: OFF"
-    if getgenv().RandomSkill then
-        task.spawn(function() 
-            while getgenv().RandomSkill do 
-                task.wait(math.random(5,15)/10)
-                local keys = {"Z","X","C","V"}
-                local k = keys[math.random(1,4)]
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[k], false, game)
-                task.wait(0.1)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[k], false, game)
-            end
-        end)
-    end
-end)
-
-CreateBtn("🧱 NOCLIP: OFF", 145, function(btn) 
-    getgenv().Noclip = not getgenv().Noclip
-    btn.Text = getgenv().Noclip and "🧱 NOCLIP: ON" or "🧱 NOCLIP: OFF"
-end)
-
-CreateBtn("💰 Sell All", 180, function() 
-    if RS:FindFirstChild("Events") then RS.Events.SellFish:FireServer("All") end
-end)
-
--- 5. Loop หลัก
-RunService.RenderStepped:Connect(function()
-    if getgenv().Noclip and lp.Character then
-        for _,v in pairs(lp.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end
-    end
-    
-    if getgenv().AutoCatch then
-        pcall(function()
-            local fishingUI = lp.PlayerGui:FindFirstChild("MainGui") and lp.PlayerGui.MainGui:FindFirstChild("Fishing")
-            if fishingUI and fishingUI.Visible and fishingUI:FindFirstChild("BarFrame") then
-                fishingUI.BarFrame.Bar.Position = UDim2.new(0.5, 0, fishingUI.BarFrame.Bar.Position.Y.Scale, 0)
-                RS.Events.Fishing:FireServer("1")
-            end
-        end)
-    end
-end)
-
--- 6. อนิเมชั่น
-MinBtn.MouseButton1Click:Connect(function()
-    local isMin = Main.Size.Y.Offset < 50
-    TweenService:Create(Main, TweenInfo.new(0.3), {Size = isMin and UDim2.new(0, 200, 0, 300) or UDim2.new(0, 200, 0, 40)}):Play()
-end)
-
-CloseBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
