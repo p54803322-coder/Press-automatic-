@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v3.1 - Integrated Skill Timing Update ]]
--- รวมระบบ "กดสกิลเช็กอัตโนมัติ" ฝังเข้าไปในระบบออโต้สกิลหลักทันที ไม่ต้องเปิดปุ่มแยกให้รกจอ!
+-- [[ ppingyyy Hub v3.5 - Natural Walk Update ]]
+-- เปลี่ยนระบบเดินทิพย์หน้า 4 ให้เป็นการสั่งเดินแบบปกติ (ขยับตัวตามฟิสิกส์เกม ไม่ใช่วาร์ป CFrame)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -26,7 +26,7 @@ sg.Parent = CoreGui
 -- ====================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 410, 0, 230) -- ปรับขนาดกลับมาเท่าเดิมเพราะสลัดปุ่มรก ๆ ออกไปแล้ว
+MainFrame.Size = UDim2.new(0, 420, 0, 270)
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
@@ -46,7 +46,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v3.1"
+Title.Text = "★ PPINGYYY HUB v3.5 (Natural Thip)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -89,10 +89,10 @@ Page3_Utils.Size = UDim2.new(1, 0, 1, 0)
 Page3_Utils.BackgroundTransparency = 1; Page3_Utils.ScrollBarThickness = 0
 Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
 
-local Page4_Teleport = Instance.new("ScrollingFrame")
-Page4_Teleport.Size = UDim2.new(1, 0, 1, 0)
-Page4_Teleport.BackgroundTransparency = 1; Page4_Teleport.ScrollBarThickness = 3
-Page4_Teleport.CanvasSize = UDim2.new(0, 0, 0, 200); Page4_Teleport.Visible = false; Page4_Teleport.Parent = PagesArea
+local Page4_Emergency = Instance.new("ScrollingFrame")
+Page4_Emergency.Size = UDim2.new(1, 0, 1, 0)
+Page4_Emergency.BackgroundTransparency = 1; Page4_Emergency.ScrollBarThickness = 3
+Page4_Emergency.CanvasSize = UDim2.new(0, 0, 0, 260); Page4_Emergency.Visible = false; Page4_Emergency.Parent = PagesArea
 
 -- ====================================================================
 -- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X]]
@@ -122,11 +122,11 @@ MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
         TabBar.Visible = false; PagesArea.Visible = false
-        MainFrame.Size = UDim2.new(0, 410, 0, 45)
+        MainFrame.Size = UDim2.new(0, 420, 0, 45)
         MinBtn.Text = "[+]"
     else
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 410, 0, 230)
+        MainFrame.Size = UDim2.new(0, 420, 0, 270)
         MinBtn.Text = "[-]"
     end
 end)
@@ -166,7 +166,7 @@ CancelBtn.BackgroundTransparency = 1; CancelBtn.ZIndex = 11; CancelBtn.Parent = 
 CloseBtn.MouseButton1Click:Connect(function()
     if isMinimized then
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 410, 0, 230)
+        MainFrame.Size = UDim2.new(0, 420, 0, 270)
         MinBtn.Text = "[-]"; isMinimized = false
     end
     ConfirmPanel.Visible = true
@@ -192,7 +192,7 @@ local function CreateTabButton(name, posY, targetPage)
     Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
 
     TBtn.MouseButton1Click:Connect(function()
-        Page1_Skills.Visible = false; Page2_Fishing.Visible = false; Page3_Utils.Visible = false; Page4_Teleport.Visible = false
+        Page1_Skills.Visible = false; Page2_Fishing.Visible = false; Page3_Utils.Visible = false; Page4_Emergency.Visible = false
         targetPage.Visible = true
         for _, v in pairs(TabBar:GetChildren()) do
             if v:IsA("TextButton") then v.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end
@@ -204,7 +204,7 @@ end
 CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
 CreateTabButton("🎣 ออโต้ตกปลา", 38, Page2_Fishing)
 CreateTabButton("🛠️ อำนวยความสะดวก", 71, Page3_Utils)
-CreateTabButton("🏝️ วาร์ปไปเกาะ", 104, Page4_Teleport)
+CreateTabButton("🚨 โหมดฉุกเฉินทิพย์", 104, Page4_Emergency)
 
 -- ====================================================================
 -- [4. ระบบทำงานหลังบ้าน (Backend)]
@@ -227,7 +227,7 @@ local function PressKey(keyStr)
     end
 end
 
--- ลูปคุมออโต้สกิล Z, X, C, V
+-- ลูปคุมออโต้สกิล
 task.spawn(function()
     while true do
         task.wait(0.3) 
@@ -244,23 +244,19 @@ task.spawn(function()
     end
 end)
 
--- [ระบบฝังรวม]: ลูปแสกนและกดวงกลมเช็กจังหวะอัตโนมัติ (จะทำงานเมื่อมีการเปิดออโต้สกิลอย่างน้อย 1 ปุ่ม)
+-- ลูปเช็กจังหวะอัตโนมัติ
 RunService.RenderStepped:Connect(function()
     if SkillStates.Z or SkillStates.X or SkillStates.C or SkillStates.V then
         pcall(function()
             local pGui = LocalPlayer.PlayerGui
             local skillCheckNames = {"SkillCheck", "CircleCheck", "TimingGui", "QTEGui", "QuickTimeEvent", "PerfectClick"}
-            
             for _, name in pairs(skillCheckNames) do
                 local targetGui = pGui:FindFirstChild(name)
-                -- ถ้าเจอกรอบเช็กสกิลเด้งขึ้นมาบนหน้าจอ
                 if targetGui and targetGui.Enabled == true then
-                    -- จำลองการคลิกเมาส์ซ้ายเผื่อเป็นแบบคลิกตรงวงกลม
                     if targetGui:FindFirstChild("Button") then
                         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
                         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
                     end
-                    -- จำลองการกด Spacebar เผื่อบางเกมให้กด Spacebar สกัดจังหวะวงกลม
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
                     break
@@ -270,7 +266,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ลูปตกปลาอัตโนมัติ
+-- ลูปตกปลาอัตโนมัติปกติ
 task.spawn(function()
     while true do
         task.wait(0.8) 
@@ -327,13 +323,35 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ฟังก์ชันระบบวาร์ปเกาะแว๊บเลย
-local function InstantTeleport(targetVector3)
+-- ====================================================================
+-- [🔥 ปรับปรุงใหม่: ฟังก์ชันเดินทิพย์แบบธรรมชาติ ไม่ใช่วาร์ป!]
+-- ====================================================================
+-- ใช้ระบบจำลองการกดคีย์บอร์ดเสมือน ตัวละครจะก้าวเดินตามปกติของเกม ไม่เกิดการวาร์ปกระตุก
+local function ThipNaturalMove(direction)
     pcall(function()
         local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-            char.HumanoidRootPart.CFrame = CFrame.new(targetVector3)
+        if not char or not char:FindFirstChildOfClass("Humanoid") then return end
+        
+        local targetKey = nil
+        if direction == "Up" then
+            targetKey = Enum.KeyCode.W
+        elseif direction == "Down" then
+            targetKey = Enum.KeyCode.S
+        elseif direction == "Left" then
+            targetKey = Enum.KeyCode.A
+        elseif direction == "Right" then
+            targetKey = Enum.KeyCode.D
+        elseif direction == "Jump" then
+            targetKey = Enum.KeyCode.Space
+        end
+
+        if targetKey then
+            task.spawn(function()
+                -- สั่งกดปุ่มค้างไว้แป๊บนึงเพื่อให้ตัวละครเคลื่อนที่เดินไปข้างหน้าอย่างสมจริง
+                VirtualInputManager:SendKeyEvent(true, targetKey, false, game)
+                task.wait(0.25) -- ระยะเวลาในการก้าวเดินต่อการกด 1 ครั้ง (ปรับเพิ่มลดความยาวของการก้าวได้)
+                VirtualInputManager:SendKeyEvent(false, targetKey, false, game)
+            end)
         end
     end)
 end
@@ -368,7 +386,6 @@ local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCa
     end)
 end
 
--- หน้า 1: ออโต้สกิล (ระบบ Perfect Skill Timing จะฝังอยู่ในนี้โดยอัตโนมัติแล้ว)
 CreateFunctionButton("Z", 5, Page1_Skills, true, function() SkillStates.Z = not SkillStates.Z return SkillStates.Z end)
 CreateFunctionButton("X", 46, Page1_Skills, true, function() SkillStates.X = not SkillStates.X return SkillStates.X end)
 CreateFunctionButton("C", 87, Page1_Skills, true, function() SkillStates.C = not SkillStates.C return SkillStates.C end)
@@ -412,32 +429,21 @@ ResetMoveBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ====================================================================
--- [6. ส่วนปุ่มหน้า 4 - ระบบปุ่มกดวาร์ปแว๊บไปเกาะทันที]
+-- [6. ส่วนปุ่มหน้า 4 - แผงควบคุมระบบก้าวเดินธรรมชาติ (เนียนตา ไม่วาร์ป)]
 -- ====================================================================
-local function CreateTpButton(islandName, posY, targetPos)
-    local TpBtn = Instance.new("TextButton")
-    TpBtn.Size = UDim2.new(0.93, 0, 0, 36)
-    TpBtn.Position = UDim2.new(0, 0, 0, posY)
-    TpBtn.Text = "⚡ วาร์ปไป : " .. islandName
-    TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TpBtn.BackgroundColor3 = Color3.fromRGB(30, 140, 90)
-    TpBtn.Font = Enum.Font.GothamBold
-    TpBtn.TextSize = 11
-    TpBtn.Parent = Page4_Teleport
-    Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 6)
-    
-    local Stroke = Instance.new("UIStroke", TpBtn)
-    Stroke.Color = Color3.fromRGB(0, 0, 0); Stroke.Thickness = 1.2
-
-    TpBtn.MouseButton1Click:Connect(function()
-        InstantTeleport(targetPos)
-    end)
+local function CreateThipBtn(text, size, pos, action, bgColor)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = size; Btn.Position = pos; Btn.Text = text
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BackgroundColor3 = bgColor or Color3.fromRGB(40, 45, 60)
+    Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 11; Btn.Parent = Page4_Emergency
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke", Btn)
+    Stroke.Color = Color3.fromRGB(0, 0, 0); Stroke.Thickness = 1
+    Btn.MouseButton1Click:Connect(action)
 end
 
-CreateTpButton("เกาะที่ 1", 5, Vector3.new(100, 50, 100))
-CreateTpButton("เกาะที่ 2", 46, Vector3.new(500, 50, -200))
-CreateTpButton("เกาะที่ 3", 87, Vector3.new(-300, 50, 800))
-CreateTpButton("เกาะที่ 4", 128, Vector3.new(1200, 50, 1200))
-
-print("------- ★ [ppingyyy Hub v3.1] Integrated Skill Timing Active! ★ -------")
-
+-- ปุ่มกดสไตล์ D-Pad บังคับเดินแบบสมจริง 
+CreateThipBtn("▲ บนทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 5), function() ThipNaturalMove("Up") end)
+CreateThipBtn("◀ ซ้ายทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 5, 0, 40), function() ThipNaturalMove("Left") end)
+CreateThipBtn("🦘 โดดทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 8
