@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v3.3 - Emergency Thip Update ]]
--- เพิ่มหน้า 4 "โหมดฉุกเฉิน" รวมปุ่มเดินทิพย์, กระโดดทิพย์ และตกปลาทิพย์ ไว้แก้บั๊กตอนปุ่มเกมปกติกดไม่ได้!
+-- [[ ppingyyy Hub v3.5 - Natural Walk Update ]]
+-- เปลี่ยนระบบเดินทิพย์หน้า 4 ให้เป็นการสั่งเดินแบบปกติ (ขยับตัวตามฟิสิกส์เกม ไม่ใช่วาร์ป CFrame)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -26,7 +26,7 @@ sg.Parent = CoreGui
 -- ====================================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 410, 0, 250) -- ปรับขนาดให้พอดีกับแผงปุ่มเดินทิพย์
+MainFrame.Size = UDim2.new(0, 420, 0, 270)
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
@@ -46,7 +46,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v3.3 (Thip Edition)"
+Title.Text = "★ PPINGYYY HUB v3.5 (Natural Thip)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -92,7 +92,7 @@ Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
 local Page4_Emergency = Instance.new("ScrollingFrame")
 Page4_Emergency.Size = UDim2.new(1, 0, 1, 0)
 Page4_Emergency.BackgroundTransparency = 1; Page4_Emergency.ScrollBarThickness = 3
-Page4_Emergency.CanvasSize = UDim2.new(0, 0, 0, 240); Page4_Emergency.Visible = false; Page4_Emergency.Parent = PagesArea
+Page4_Emergency.CanvasSize = UDim2.new(0, 0, 0, 260); Page4_Emergency.Visible = false; Page4_Emergency.Parent = PagesArea
 
 -- ====================================================================
 -- [2. ระบบปุ่มย่อ [-] และ ปุ่มลบ [X]]
@@ -122,11 +122,11 @@ MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
         TabBar.Visible = false; PagesArea.Visible = false
-        MainFrame.Size = UDim2.new(0, 410, 0, 45)
+        MainFrame.Size = UDim2.new(0, 420, 0, 45)
         MinBtn.Text = "[+]"
     else
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 410, 0, 250)
+        MainFrame.Size = UDim2.new(0, 420, 0, 270)
         MinBtn.Text = "[-]"
     end
 end)
@@ -166,7 +166,7 @@ CancelBtn.BackgroundTransparency = 1; CancelBtn.ZIndex = 11; CancelBtn.Parent = 
 CloseBtn.MouseButton1Click:Connect(function()
     if isMinimized then
         TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 410, 0, 250)
+        MainFrame.Size = UDim2.new(0, 420, 0, 270)
         MinBtn.Text = "[-]"; isMinimized = false
     end
     ConfirmPanel.Visible = true
@@ -204,7 +204,7 @@ end
 CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
 CreateTabButton("🎣 ออโต้ตกปลา", 38, Page2_Fishing)
 CreateTabButton("🛠️ อำนวยความสะดวก", 71, Page3_Utils)
-CreateTabButton("🚨 โหมดฉุกเฉินทิพย์", 104, Page4_Emergency) -- เปิดตัวหน้าต่างใหม่!
+CreateTabButton("🚨 โหมดฉุกเฉินทิพย์", 104, Page4_Emergency)
 
 -- ====================================================================
 -- [4. ระบบทำงานหลังบ้าน (Backend)]
@@ -227,7 +227,7 @@ local function PressKey(keyStr)
     end
 end
 
--- ลูปคุมออโต้สกิล Z, X, C, V
+-- ลูปคุมออโต้สกิล
 task.spawn(function()
     while true do
         task.wait(0.3) 
@@ -244,13 +244,12 @@ task.spawn(function()
     end
 end)
 
--- ลูปแสกนและกดวงกลมเช็กจังหวะอัตโนมัติ 
+-- ลูปเช็กจังหวะอัตโนมัติ
 RunService.RenderStepped:Connect(function()
     if SkillStates.Z or SkillStates.X or SkillStates.C or SkillStates.V then
         pcall(function()
             local pGui = LocalPlayer.PlayerGui
             local skillCheckNames = {"SkillCheck", "CircleCheck", "TimingGui", "QTEGui", "QuickTimeEvent", "PerfectClick"}
-            
             for _, name in pairs(skillCheckNames) do
                 local targetGui = pGui:FindFirstChild(name)
                 if targetGui and targetGui.Enabled == true then
@@ -267,7 +266,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ลูปตกปลาอัตโนมัติ
+-- ลูปตกปลาอัตโนมัติปกติ
 task.spawn(function()
     while true do
         task.wait(0.8) 
@@ -324,24 +323,35 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ฟังก์ชันคุมการเคลื่อนที่ของระบบ "สายทิพย์"
-local function ThipMove(direction)
+-- ====================================================================
+-- [🔥 ปรับปรุงใหม่: ฟังก์ชันเดินทิพย์แบบธรรมชาติ ไม่ใช่วาร์ป!]
+-- ====================================================================
+-- ใช้ระบบจำลองการกดคีย์บอร์ดเสมือน ตัวละครจะก้าวเดินตามปกติของเกม ไม่เกิดการวาร์ปกระตุก
+local function ThipNaturalMove(direction)
     pcall(function()
         local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local hrp = char.HumanoidRootPart
-            local moveDistance = 4 -- ระยะขยับก้าวต่อการกด 1 ครั้ง ปรับได้ตามใจมึง
-            if direction == "Up" then
-                hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -moveDistance)
-            elseif direction == "Down" then
-                hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, moveDistance)
-            elseif direction == "Left" then
-                hrp.CFrame = hrp.CFrame * CFrame.new(-moveDistance, 0, 0)
-            elseif direction == "Right" then
-                hrp.CFrame = hrp.CFrame * CFrame.new(moveDistance, 0, 0)
-            elseif direction == "Jump" then
-                hrp.CFrame = hrp.CFrame * CFrame.new(0, 7, 0) -- โดดเด้งขึ้นฟ้า 7 บล็อกลอยทิพย์ ๆ
-            end
+        if not char or not char:FindFirstChildOfClass("Humanoid") then return end
+        
+        local targetKey = nil
+        if direction == "Up" then
+            targetKey = Enum.KeyCode.W
+        elseif direction == "Down" then
+            targetKey = Enum.KeyCode.S
+        elseif direction == "Left" then
+            targetKey = Enum.KeyCode.A
+        elseif direction == "Right" then
+            targetKey = Enum.KeyCode.D
+        elseif direction == "Jump" then
+            targetKey = Enum.KeyCode.Space
+        end
+
+        if targetKey then
+            task.spawn(function()
+                -- สั่งกดปุ่มค้างไว้แป๊บนึงเพื่อให้ตัวละครเคลื่อนที่เดินไปข้างหน้าอย่างสมจริง
+                VirtualInputManager:SendKeyEvent(true, targetKey, false, game)
+                task.wait(0.25) -- ระยะเวลาในการก้าวเดินต่อการกด 1 ครั้ง (ปรับเพิ่มลดความยาวของการก้าวได้)
+                VirtualInputManager:SendKeyEvent(false, targetKey, false, game)
+            end)
         end
     end)
 end
@@ -419,24 +429,21 @@ ResetMoveBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ====================================================================
--- [6. ส่วนปุ่มหน้า 4 - แผงควบคุมสายทิพย์โหมดฉุกเฉิน (Thip Control Interface)]
+-- [6. ส่วนปุ่มหน้า 4 - แผงควบคุมระบบก้าวเดินธรรมชาติ (เนียนตา ไม่วาร์ป)]
 -- ====================================================================
-local function CreateThipBtn(text, size, pos, action)
+local function CreateThipBtn(text, size, pos, action, bgColor)
     local Btn = Instance.new("TextButton")
     Btn.Size = size; Btn.Position = pos; Btn.Text = text
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255); Btn.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
-    Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 12; Btn.Parent = Page4_Emergency
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 5)
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BackgroundColor3 = bgColor or Color3.fromRGB(40, 45, 60)
+    Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 11; Btn.Parent = Page4_Emergency
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
     local Stroke = Instance.new("UIStroke", Btn)
     Stroke.Color = Color3.fromRGB(0, 0, 0); Stroke.Thickness = 1
     Btn.MouseButton1Click:Connect(action)
 end
 
--- ประกอบแผงควบคุมจอยสติ๊กเดินทิพย์ (D-Pad Style)
-CreateThipBtn("▲ บนทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 5), function() ThipMove("Up") end)
-CreateThipBtn("◀ ซ้ายทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 5, 0, 40), function() ThipMove("Left") end)
-CreateThipBtn("🦘 โดดทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 40), function() ThipMove("Jump") end)
-CreateThipBtn("▶ ขวาทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 155, 0, 40), function() ThipMove("Right") end)
-CreateThipBtn("▼ ล่างทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 75), function() ThipMove("Down") end)
-
--- ปุ่มตกปลาทิพย์ (สำรองยามปุ่มเกมหาย) วางแยกไว้ด้าน
+-- ปุ่มกดสไตล์ D-Pad บังคับเดินแบบสมจริง 
+CreateThipBtn("▲ บนทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 5), function() ThipNaturalMove("Up") end)
+CreateThipBtn("◀ ซ้ายทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 5, 0, 40), function() ThipNaturalMove("Left") end)
+CreateThipBtn("🦘 โดดทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 8
