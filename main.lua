@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v3.7 - Fisch Boss & SkillCheck Optimized ]]
--- บันทึกการแก้ไข: แก้ไขบั๊กลูปค้างตอนสู้บอส Chromatic Koi, แก้ปุ่มเดินค้าง, และปรับระบบ Auto Skill Check ใหม่ร้อยเปอร์เซ็นต์
+-- [[ ppingyyy Hub v3.2 - Smooth Animation Edition ]]
+-- บันทึกการแก้ไข: เพิ่มระบบ TweenService คุมแอนิเมชันหด/ขยาย UI และแอนิเมชันปุ่มหมวดหมู่ตอนเมาส์ชี้พร้อมเสียงเด้งดึ๋ง
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -7,6 +7,7 @@ local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService") -- เรียกใช้งานพระเอกของงานนี้
 
 local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
@@ -20,6 +21,12 @@ sg.Name = "ppingyyy_MainHub"
 sg.ResetOnSpawn = false
 sg.Parent = CoreGui
 
+-- สร้างอ็อบเจกต์เสียง (ถ้าไม่อยากได้เสียง ให้เปลี่ยน ID หรือปล่อยผ่านได้เลยไอ้ชาย)
+local ClickSound = Instance.new("Sound")
+ClickSound.SoundId = "rbxassetid://6895079853" -- เสียงกิ๊กๆ ตอนกด/ชี้
+ClickSound.Volume = 0.5
+ClickSound.Parent = sg
+
 -- ====================================================================
 -- [1. Main Frame & UI Setup]
 -- ====================================================================
@@ -29,6 +36,7 @@ MainFrame.Size = UDim2.new(0, 420, 0, 270)
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true -- บังคับให้ไอเทมข้างในซ่อนตัวตอนหดขนาดหน้าต่าง
 MainFrame.Active = true
 MainFrame.Draggable = true 
 MainFrame.Parent = sg
@@ -45,7 +53,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v3.7 (Fixed & Optimized)"
+Title.Text = "★ PPINGYYY HUB v3.2"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -72,25 +80,31 @@ PagesArea.Position = UDim2.new(0, 145, 0, 50)
 PagesArea.BackgroundTransparency = 1
 PagesArea.Parent = MainFrame
 
+-- สร้าง CanvasGroup ช่วยให้ควบคุมกลุ่มความโปร่งใสตอนจางหายได้เนียนๆ
+local ContentGroup = Instance.new("CanvasGroup")
+ContentGroup.Size = UDim2.new(1, 0, 1, 0)
+ContentGroup.BackgroundTransparency = 1
+ContentGroup.Parent = PagesArea
+
 local Page1_Skills = Instance.new("ScrollingFrame")
 Page1_Skills.Size = UDim2.new(1, 0, 1, 0)
 Page1_Skills.BackgroundTransparency = 1; Page1_Skills.ScrollBarThickness = 3
-Page1_Skills.CanvasSize = UDim2.new(0, 0, 0, 180); Page1_Skills.Visible = true; Page1_Skills.Parent = PagesArea
+Page1_Skills.CanvasSize = UDim2.new(0, 0, 0, 180); Page1_Skills.Visible = true; Page1_Skills.Parent = ContentGroup
 
 local Page2_Fishing = Instance.new("ScrollingFrame")
 Page2_Fishing.Size = UDim2.new(1, 0, 1, 0)
 Page2_Fishing.BackgroundTransparency = 1; Page2_Fishing.ScrollBarThickness = 0
-Page2_Fishing.Visible = false; Page2_Fishing.Parent = PagesArea
+Page2_Fishing.Visible = false; Page2_Fishing.Parent = ContentGroup
 
 local Page3_Utils = Instance.new("ScrollingFrame")
 Page3_Utils.Size = UDim2.new(1, 0, 1, 0)
-Page3_Utils.BackgroundTransparency = 1; Page3_Utils.ScrollBarThickness = 0
-Page3_Utils.Visible = false; Page3_Utils.Parent = PagesArea
+Page3_Utils.BackgroundTransparency = 1; Page3_Utils.ScrollBarThickness = 3
+Page3_Utils.CanvasSize = UDim2.new(0, 0, 0, 180); Page3_Utils.Visible = false; Page3_Utils.Parent = ContentGroup
 
 local Page4_Emergency = Instance.new("ScrollingFrame")
 Page4_Emergency.Size = UDim2.new(1, 0, 1, 0)
 Page4_Emergency.BackgroundTransparency = 1; Page4_Emergency.ScrollBarThickness = 3
-Page4_Emergency.CanvasSize = UDim2.new(0, 0, 0, 260); Page4_Emergency.Visible = false; Page4_Emergency.Parent = PagesArea
+Page4_Emergency.CanvasSize = UDim2.new(0, 0, 0, 260); Page4_Emergency.Visible = false; Page4_Emergency.Parent = ContentGroup
 
 -- ปุ่มย่อ / ปุ่มปิด
 local MinBtn = Instance.new("TextButton")
@@ -103,17 +117,29 @@ CloseBtn.Size = UDim2.new(0, 25, 0, 25); CloseBtn.Position = UDim2.new(0.9, 0, 0
 CloseBtn.Text = "[X]"; CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255); CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 CloseBtn.Font = Enum.Font.GothamBold; CloseBtn.Parent = MainFrame; Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
+-- 🔥 [[ ระบบแอนิเมชันย่อ/ขยายหน้า GUI บานใหญ่แบบสมูท ]]
 local isMinimized = false
+local tweenInfoUI = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
+    ClickSound:Play() -- เล่นเสียงตอนกดปุ่มย่อหน้าจอ
+    
     if isMinimized then
-        TabBar.Visible = false; PagesArea.Visible = false
-        MainFrame.Size = UDim2.new(0, 420, 0, 45)
         MinBtn.Text = "[+]"
+        -- ค่อยๆ หดขนาดความสูงลงมาเหลือ 45 และจางเนื้อหาให้หายไป
+        TweenService:Create(MainFrame, tweenInfoUI, {Size = UDim2.new(0, 420, 0, 45)}):Play()
+        TweenService:Create(ContentGroup, tweenInfoUI, {GroupTransparency = 1}):Play()
+        TweenService:Create(TabBar, tweenInfoUI, {Size = UDim2.new(0, 130, 0, 0)}):Play()
+        task.wait(0.35)
+        TabBar.Visible = false
     else
-        TabBar.Visible = true; PagesArea.Visible = true
-        MainFrame.Size = UDim2.new(0, 420, 0, 270)
         MinBtn.Text = "[-]"
+        TabBar.Visible = true
+        -- ค่อยๆ ขยายขนาดความสูงกลับไปเป็น 270 และแสดงเนื้อหาคืนมา
+        TweenService:Create(MainFrame, tweenInfoUI, {Size = UDim2.new(0, 420, 0, 270)}):Play()
+        TweenService:Create(ContentGroup, tweenInfoUI, {GroupTransparency = 0}):Play()
+        TweenService:Create(TabBar, tweenInfoUI, {Size = UDim2.new(0, 130, 1, -55)}):Play()
     end
 end)
 
@@ -136,19 +162,45 @@ local CancelBtn = Instance.new("TextButton")
 CancelBtn.Size = UDim2.new(0.85, 0, 0, 30); CancelBtn.Position = UDim2.new(0.075, 0, 0, 145); CancelBtn.Text = "เปลี่ยนใจไม่ลบละ"
 CancelBtn.TextColor3 = Color3.fromRGB(150, 150, 150); CancelBtn.BackgroundTransparency = 1; CancelBtn.ZIndex = 11; CancelBtn.Parent = ConfirmPanel
 
-CloseBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = true end)
-CancelBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = false end)
+CloseBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = true; ClickSound:Play() end)
+CancelBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = false; ClickSound:Play() end)
 SureBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
 ShutUpBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
 
+-- 🔥 [[ ฟังก์ชันสร้างปุ่มหมวดหมู่ + ระบบแอนิเมชันขยายตัวตอนเมาส์ชี้ ]]
 local function CreateTabButton(name, posY, targetPage)
     local TBtn = Instance.new("TextButton")
-    TBtn.Size = UDim2.new(1, 0, 0, 30); TBtn.Position = UDim2.new(0, 0, 0, posY); TBtn.Text = name
-    TBtn.TextColor3 = Color3.fromRGB(255, 255, 255); TBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 10; TBtn.Parent = TabBar
+    TBtn.Size = UDim2.new(1, 0, 0, 30)
+    TBtn.Position = UDim2.new(0, 0, 0, posY)
+    TBtn.Text = name
+    TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    TBtn.Font = Enum.Font.GothamBold
+    TBtn.TextSize = 10
+    TBtn.Parent = TabBar
     Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
 
+    local tweenInfoTab = TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+    -- เหตุการณ์ตอนเอาเมาส์ชี้ปุ่ม (ขยายใหญ่ขึ้นมานิดนึง + ขยับตำแหน่งมาขวาหน่อยให้ดูเด้ง)
+    TBtn.MouseEnter:Connect(function()
+        ClickSound:Play() -- เล่นเสียงกิ๊กเบาๆ ตอนเมาส์ชี้หมวดหมู่
+        TweenService:Create(TBtn, tweenInfoTab, {
+            Size = UDim2.new(1, 8, 0, 34), -- ขยายทั้งกว้างและสูงขึ้นนิดนึง
+            Position = UDim2.new(0, -4, 0, posY - 2) -- ปรับกึ่งกลางให้สมดุล
+        }):Play()
+    end)
+
+    -- เหตุการณ์ตอนเมาส์ออกจากปุ่ม (หดกลับขนาดเท่าเดิมเป๊ะๆ)
+    TBtn.MouseLeave:Connect(function()
+        TweenService:Create(TBtn, tweenInfoTab, {
+            Size = UDim2.new(1, 0, 0, 30),
+            Position = UDim2.new(0, 0, 0, posY)
+        }):Play()
+    end)
+
     TBtn.MouseButton1Click:Connect(function()
+        ClickSound:Play()
         Page1_Skills.Visible = false; Page2_Fishing.Visible = false; Page3_Utils.Visible = false; Page4_Emergency.Visible = false
         targetPage.Visible = true
         for _, v in pairs(TabBar:GetChildren()) do if v:IsA("TextButton") then v.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end end
@@ -159,10 +211,10 @@ end
 CreateTabButton("⚔️ ออโต้สกิล", 5, Page1_Skills)
 CreateTabButton("🎣 ออโต้ตกปลา", 38, Page2_Fishing)
 CreateTabButton("🛠️ อำนวยความสะดวก", 71, Page3_Utils)
-CreateTabButton("🚨 โหมดฉุกเฉินทิพย์", 104, Page4_Emergency)
+CreateTabButton("🚨 โหมดวาร์ปฉุกเฉิน", 104, Page4_Emergency)
 
 -- ====================================================================
--- [2. ระบบ Backend ทำงานหลังบ้าน - บิ๊กคลีนอัปเกรดแก้บั๊กค้าง]
+-- [2. ระบบ Backend ทำงานหลังบ้าน]
 -- ====================================================================
 local SkillStates = { Z = false, X = false, C = false, V = false }
 getgenv().PPINGYYY_AutoCast = false 
@@ -181,7 +233,7 @@ local function PressKey(keyStr)
     end
 end
 
--- ลูปคุมออโต้สกิล (เพิ่ม Safe-Delay ป้องกันปุ่มค้าง)
+-- ลูปคุมออโต้สกิล
 task.spawn(function()
     while true do
         task.wait(0.25)
@@ -193,35 +245,6 @@ task.spawn(function()
             task.wait(0.3)
         end
     end
-end)
-
--- 🔥 [[ แก้บั๊กตัวพ่อ: รีเซ็ตและดักจับระบบ UI Skill Check ทุกรูปแบบทั้งโหมดปกติและโหมดสู้บอส ]]
-RunService.Heartbeat:Connect(function()
-    pcall(function()
-        local pGui = LocalPlayer.PlayerGui
-        -- สแกนหาชิ้นส่วน UI ที่เกมชอบเปลี่ยนชื่อตอนสู้บอสตัวโหดๆ
-        local targetGuis = {
-            pGui:FindFirstChild("MainGui") and pGui.MainGui:FindFirstChild("Fishing"),
-            pGui:FindFirstChild("SkillCheck"),
-            pGui:FindFirstChild("CircleCheck"),
-            pGui:FindFirstChild("BossMechanicGui")
-        }
-
-        for _, currentGui in pairs(targetGuis) do
-            if currentGui and (currentGui.ClassName == "ScreenGui" and currentGui.Enabled or currentGui.ClassName == "Frame" and currentGui.Visible) then
-                -- หาปุ่มกดในวงกลมหรือบาร์
-                local clickButton = currentGui:FindFirstChild("Button") or currentGui:FindFirstChild("SafeZone") or currentGui:FindFirstChild("TapButton")
-                if clickButton then
-                    -- ส่งคำสั่งเมาส์คลิกแบบ Force Click 
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-                    -- ส่ง Spacebar ดักไว้อีกชั้นนึงกันพลาด
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-                end
-            end
-        end
-    end)
 end)
 
 -- ออโต้เหวี่ยงเบ็ด
@@ -239,7 +262,7 @@ task.spawn(function()
     end
 end)
 
--- ล็อกเกจเขียวให้อยู่ตรงกลางเสมอ (ป้องกันเบ็ดระเบิด/เบ็ดพัง)
+-- ล็อกเกจเขียวให้อยู่ตรงกลางเสมอ
 RunService.RenderStepped:Connect(function()
     if getgenv().PPINGYYY_Anchor then
         pcall(function()
@@ -275,39 +298,76 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- 🔥 [[ แก้บั๊กปุ่มเดินค้าง/ตัวแข็ง ]]: สั่งล้างแอนิเมชันและปลดล็อก State ของ Humanoid ทุกครั้งหลังเรียกใช้ระบบเดินทิพย์
-local function ThipPhysicsMove(direction)
+-- ระบบ Smooth Teleport ขยับสั้นๆ แบบเนียนๆ
+local function SmoothWarp(direction)
     pcall(function()
         local char = LocalPlayer.Character
-        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if not humanoid or not hrp then return end
+        if not hrp then return end
 
-        -- คืนค่าสถานะป้องกันการขยับไม่ได้ (แก้บั๊กตัวแข็ง)
-        humanoid.PlatformStand = false
-        humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+        local warpDistance = 8
+        local targetCFrame = hrp.CFrame
 
-        if direction == "Jump" then 
-            humanoid.Jump = true 
-            return 
+        if direction == "Up" then targetCFrame = hrp.CFrame * CFrame.new(0, 0, -warpDistance)
+        elseif direction == "Down" then targetCFrame = hrp.CFrame * CFrame.new(0, 0, warpDistance)
+        elseif direction == "Left" then targetCFrame = hrp.CFrame * CFrame.new(-warpDistance, 0, 0)
+        elseif direction == "Right" then targetCFrame = hrp.CFrame * CFrame.new(warpDistance, 0, 0)
+        elseif direction == "Jump" then targetCFrame = hrp.CFrame * CFrame.new(0, warpDistance, 0) end
+
+        local steps = 3
+        for i = 1, steps do
+            hrp.CFrame = hrp.CFrame:Lerp(targetCFrame, i/steps)
+            task.wait(0.01)
+        end
+    end)
+end
+
+-- ฟังก์ชันประมวลผลวาร์ปพิกัดเนียน + ลบทิ้งเมื่อถึงจุดหมาย
+local function TeleportToCoordinates(inputString, UI_TextBox, UI_Button)
+    pcall(function()
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        local coords = {}
+        for num in string.gmatch(inputString, "[-?%d%.]+") do
+            table.insert(coords, tonumber(num))
         end
 
-        task.spawn(function()
-            local moveVector = Vector3.new(0, 0, 0)
-            if direction == "Up" then moveVector = hrp.CFrame.LookVector
-            elseif direction == "Down" then moveVector = -hrp.CFrame.LookVector
-            elseif direction == "Left" then moveVector = -hrp.CFrame.RightVector
-            elseif direction == "Right" then moveVector = hrp.CFrame.RightVector end
+        if #coords >= 3 then
+            local targetPos = Vector3.new(coords[1], coords[2], coords[3])
+            local startCFrame = hrp.CFrame
+            local distance = (targetPos - hrp.Position).Magnitude
             
-            local endTime = tick() + 0.15
-            while tick() < endTime do
-                humanoid:Move(moveVector, false)
-                task.wait()
+            local warpSpeed = 150 
+            local duration = math.clamp(distance / warpSpeed, 0.2, 3.5)
+            local startTime = tick()
+            
+            UI_Button.Text = "⏳..."
+            UI_Button.BackgroundColor3 = Color3.fromRGB(240, 140, 20)
+
+            while tick() - startTime < duration do
+                local progress = (tick() - startTime) / duration
+                if not hrp or not hrp.Parent then break end
+                hrp.CFrame = CFrame.new(startCFrame.Position:Lerp(targetPos, progress)) * startCFrame.Rotation
+                RunService.Heartbeat:Wait()
             end
-            -- ปล่อยปุ่มเดินอัตโนมัติเมื่อจบลูป ป้องกันเดินค้างไปเอง
-            humanoid:Move(Vector3.new(0,0,0), false)
-        end)
+            
+            if hrp then hrp.CFrame = CFrame.new(targetPos) * startCFrame.Rotation end
+            
+            UI_TextBox.Text = ""
+            UI_Button.Text = "✅ ถึงแล้ว!"
+            UI_Button.BackgroundColor3 = Color3.fromRGB(0, 180, 50)
+            task.wait(1.2)
+            UI_Button.Text = "วาร์ป"
+            UI_Button.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+        else
+            UI_Button.Text = "❌ มั่ว!"
+            UI_Button.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+            task.wait(1.2)
+            UI_Button.Text = "วาร์ป"
+            UI_Button.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+        end
     end)
 end
 
@@ -325,6 +385,7 @@ local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCa
     Stroke.Color = Color3.fromRGB(0, 0, 0); Stroke.Thickness = 1.2
 
     Btn.MouseButton1Click:Connect(function()
+        ClickSound:Play()
         local state = toggleCallback()
         if state then
             Btn.Text = (isSkill and ("AUTO " .. keyName .. " : ON")) or (keyName .. " : ON")
@@ -349,7 +410,7 @@ ManualSellBtn.Size = UDim2.new(0.93, 0, 0, 36); ManualSellBtn.Position = UDim2.n
 ManualSellBtn.Text = "💰 ขายปลาทั้งหมดทันที"; ManualSellBtn.TextColor3 = Color3.fromRGB(255, 255, 255); ManualSellBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100)
 ManualSellBtn.Font = Enum.Font.GothamBold; ManualSellBtn.TextSize = 11; ManualSellBtn.Parent = Page2_Fishing
 Instance.new("UICorner", ManualSellBtn).CornerRadius = UDim.new(0, 6)
-ManualSellBtn.MouseButton1Click:Connect(function() pcall(function() ReplicatedStorage.Events.SellFish:FireServer("All") end) end)
+ManualSellBtn.MouseButton1Click:Connect(function() ClickSound:Play(); pcall(function() ReplicatedStorage.Events.SellFish:FireServer("All") end) end)
 
 CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 5, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
 CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 46, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
@@ -359,26 +420,7 @@ FlyScriptBtn.Size = UDim2.new(0.93, 0, 0, 36); FlyScriptBtn.Position = UDim2.new
 FlyScriptBtn.Text = "🚀 เปิดสคริปต์บิน FLY GUI V11"; FlyScriptBtn.TextColor3 = Color3.fromRGB(255, 255, 255); FlyScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)
 FlyScriptBtn.Font = Enum.Font.GothamBold; FlyScriptBtn.TextSize = 11; FlyScriptBtn.Parent = Page3_Utils
 Instance.new("UICorner", FlyScriptBtn).CornerRadius = UDim.new(0, 6)
-FlyScriptBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))() end)
+FlyScriptBtn.MouseButton1Click:Connect(function() ClickSound:Play(); loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))() end)
 
--- แผงควบคุมหน้า 4 (จัดปุ่มเดินทิพย์แบบป้องกันการกดค้าง)
-local function CreateThipBtn(text, size, pos, action, bgColor)
-    local Btn = Instance.new("TextButton")
-    Btn.Size = size; Btn.Position = pos; Btn.Text = text; Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.BackgroundColor3 = bgColor or Color3.fromRGB(40, 45, 60); Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 11; Btn.Parent = Page4_Emergency
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", Btn).Color = Color3.fromRGB(0, 0, 0)
-    Btn.MouseButton1Click:Connect(action)
-end
-
-CreateThipBtn("▲ บนทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 5), function() ThipPhysicsMove("Up") end)
-CreateThipBtn("◀ ซ้ายทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 5, 0, 40), function() ThipPhysicsMove("Left") end)
-CreateThipBtn("🦘 โดดทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 40), function() ThipPhysicsMove("Jump") end, Color3.fromRGB(0, 120, 150))
-CreateThipBtn("▶ ขวาทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 155, 0, 40), function() ThipPhysicsMove("Right") end)
-CreateThipBtn("▼ ล่างทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 75), function() ThipPhysicsMove("Down") end)
-
-CreateThipBtn("🎣 ปุ่มตกปลาทิพย์ (Emergency Cast)", UDim2.new(0, 220, 0, 38), UDim2.new(0, 5, 0, 125), function()
-    pcall(function() ReplicatedStorage.Events.Fishing:FireServer() end)
-end, Color3.fromRGB(150, 80, 0))
-
-print("------- ★ [ppingyyy Hub v3.7] Hotfixed & Ready to Use! ★ -------")
+local CopyPosBtn = Instance.new("TextButton")
+CopyPosBtn.Size = UDim2.new(0.93, 0, 0, 36); 
