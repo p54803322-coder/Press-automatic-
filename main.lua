@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v3.6 - GitHub Clean Optimization ]]
--- ปรับปรุงจากไฟล์หลัก: แก้ไขลูป RenderStepped ถี่เกินไป และเปลี่ยนระบบเดินทิพย์ไม่ให้เสี่ยงโดนแบน
+-- [[ ppingyyy Hub v3.7 - Fisch Boss & SkillCheck Optimized ]]
+-- บันทึกการแก้ไข: แก้ไขบั๊กลูปค้างตอนสู้บอส Chromatic Koi, แก้ปุ่มเดินค้าง, และปรับระบบ Auto Skill Check ใหม่ร้อยเปอร์เซ็นต์
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -10,7 +10,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
--- ลบ GUI ตัวเก่าออกก่อนรันตัวใหม่
+-- ลบ UI เก่าป้องกันการซ้อนทับ
 if CoreGui:FindFirstChild("ppingyyy_MainHub") then
     CoreGui["ppingyyy_MainHub"]:Destroy()
 end
@@ -45,7 +45,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v3.6 (GitHub Opt)"
+Title.Text = "★ PPINGYYY HUB v3.7 (Fixed & Optimized)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -138,11 +138,9 @@ CancelBtn.TextColor3 = Color3.fromRGB(150, 150, 150); CancelBtn.BackgroundTransp
 
 CloseBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = true end)
 CancelBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = false end)
-local function DestroyHub() sg:Destroy() end
-SureBtn.MouseButton1Click:Connect(DestroyHub)
-ShutUpBtn.MouseButton1Click:Connect(DestroyHub)
+SureBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
+ShutUpBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
 
--- สร้างแท็บปุ่มสลับหน้า
 local function CreateTabButton(name, posY, targetPage)
     local TBtn = Instance.new("TextButton")
     TBtn.Size = UDim2.new(1, 0, 0, 30); TBtn.Position = UDim2.new(0, 0, 0, posY); TBtn.Text = name
@@ -164,7 +162,7 @@ CreateTabButton("🛠️ อำนวยความสะดวก", 71, Page3_
 CreateTabButton("🚨 โหมดฉุกเฉินทิพย์", 104, Page4_Emergency)
 
 -- ====================================================================
--- [2. ระบบ Backend ทำงานหลังบ้าน (แก้ไขจุดเสี่ยงแครช)]
+-- [2. ระบบ Backend ทำงานหลังบ้าน - บิ๊กคลีนอัปเกรดแก้บั๊กค้าง]
 -- ====================================================================
 local SkillStates = { Z = false, X = false, C = false, V = false }
 getgenv().PPINGYYY_AutoCast = false 
@@ -177,55 +175,59 @@ local function PressKey(keyStr)
     if keyCode then
         pcall(function()
             VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-            task.wait(0.05)
+            task.wait(0.02)
             VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
         end)
     end
 end
 
--- ลูปคุมออโต้สกิล (หน่วงเวลาปลอดภัย ไม่ให้เซิร์ฟเวอร์ดีด)
+-- ลูปคุมออโต้สกิล (เพิ่ม Safe-Delay ป้องกันปุ่มค้าง)
 task.spawn(function()
     while true do
-        task.wait(0.3) 
-        if SkillStates["V"] then PressKey("V") task.wait(0.5) end
+        task.wait(0.25)
+        if SkillStates["V"] then PressKey("V") task.wait(0.3) end
         local activeSkills = {}
         for key, isEnabled in pairs(SkillStates) do if isEnabled and key ~= "V" then table.insert(activeSkills, key) end end
         if #activeSkills > 0 then
             PressKey(activeSkills[math.random(1, #activeSkills)])
-            task.wait(0.4) 
+            task.wait(0.3)
         end
     end
 end)
 
--- ลูปเช็กจังหวะวงกลม Perfect Click (ใส่ Safe Check ป้องกันลูปนิ่ง)
+-- 🔥 [[ แก้บั๊กตัวพ่อ: รีเซ็ตและดักจับระบบ UI Skill Check ทุกรูปแบบทั้งโหมดปกติและโหมดสู้บอส ]]
 RunService.Heartbeat:Connect(function()
-    local anyActive = false
-    for _, state in pairs(SkillStates) do if state then anyActive = true break end end
-    
-    if anyActive then
-        pcall(function()
-            local pGui = LocalPlayer.PlayerGui
-            local skillCheckNames = {"SkillCheck", "CircleCheck", "TimingGui", "QTEGui", "PerfectClick"}
-            for _, name in pairs(skillCheckNames) do
-                local targetGui = pGui:FindFirstChild(name)
-                if targetGui and targetGui.Enabled == true then
-                    if targetGui:FindFirstChild("Button") then
-                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-                    end
+    pcall(function()
+        local pGui = LocalPlayer.PlayerGui
+        -- สแกนหาชิ้นส่วน UI ที่เกมชอบเปลี่ยนชื่อตอนสู้บอสตัวโหดๆ
+        local targetGuis = {
+            pGui:FindFirstChild("MainGui") and pGui.MainGui:FindFirstChild("Fishing"),
+            pGui:FindFirstChild("SkillCheck"),
+            pGui:FindFirstChild("CircleCheck"),
+            pGui:FindFirstChild("BossMechanicGui")
+        }
+
+        for _, currentGui in pairs(targetGuis) do
+            if currentGui and (currentGui.ClassName == "ScreenGui" and currentGui.Enabled or currentGui.ClassName == "Frame" and currentGui.Visible) then
+                -- หาปุ่มกดในวงกลมหรือบาร์
+                local clickButton = currentGui:FindFirstChild("Button") or currentGui:FindFirstChild("SafeZone") or currentGui:FindFirstChild("TapButton")
+                if clickButton then
+                    -- ส่งคำสั่งเมาส์คลิกแบบ Force Click 
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                    -- ส่ง Spacebar ดักไว้อีกชั้นนึงกันพลาด
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-                    break
                 end
             end
-        end)
-    end
+        end
+    end)
 end)
 
--- ออโต้เหวี่ยงเบ็ดปกติ
+-- ออโต้เหวี่ยงเบ็ด
 task.spawn(function()
     while true do
-        task.wait(0.8) 
+        task.wait(0.5) 
         if getgenv().PPINGYYY_AutoCast then
             pcall(function()
                 local char = LocalPlayer.Character
@@ -237,7 +239,7 @@ task.spawn(function()
     end
 end)
 
--- ล็อกเกจเขียวตรงกลาง
+-- ล็อกเกจเขียวให้อยู่ตรงกลางเสมอ (ป้องกันเบ็ดระเบิด/เบ็ดพัง)
 RunService.RenderStepped:Connect(function()
     if getgenv().PPINGYYY_Anchor then
         pcall(function()
@@ -246,14 +248,16 @@ RunService.RenderStepped:Connect(function()
                 local barFrame = fishingUI:FindFirstChild("BarFrame")
                 if barFrame and barFrame:FindFirstChild("Bar") then
                     barFrame.Bar.Position = UDim2.new(0.5, 0, barFrame.Bar.Position.Y.Scale, 0)
-                    if math.random(1, 4) == 1 then ReplicatedStorage.Fishing:FireServer("1") end
+                    if math.random(1, 3) == 1 then 
+                        ReplicatedStorage.Fishing:FireServer("1") 
+                    end
                 end
             end
         end)
     end
 end)
 
--- ฟิสิกส์ปีนกำแพง / Noclip
+-- ฟิสิกส์คุมตัวละคร (ปีนกำแพง / Noclip)
 RunService.Stepped:Connect(function()
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
@@ -271,7 +275,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ระบบเดินทิพย์แบบเนียน (ใช้ระบบฟิสิกส์ตัวละคร ไม่ใช่การวาร์ป CFrame)
+-- 🔥 [[ แก้บั๊กปุ่มเดินค้าง/ตัวแข็ง ]]: สั่งล้างแอนิเมชันและปลดล็อก State ของ Humanoid ทุกครั้งหลังเรียกใช้ระบบเดินทิพย์
 local function ThipPhysicsMove(direction)
     pcall(function()
         local char = LocalPlayer.Character
@@ -279,7 +283,15 @@ local function ThipPhysicsMove(direction)
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         if not humanoid or not hrp then return end
 
-        if direction == "Jump" then humanoid.Jump = true return end
+        -- คืนค่าสถานะป้องกันการขยับไม่ได้ (แก้บั๊กตัวแข็ง)
+        humanoid.PlatformStand = false
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+
+        if direction == "Jump" then 
+            humanoid.Jump = true 
+            return 
+        end
 
         task.spawn(function()
             local moveVector = Vector3.new(0, 0, 0)
@@ -288,11 +300,13 @@ local function ThipPhysicsMove(direction)
             elseif direction == "Left" then moveVector = -hrp.CFrame.RightVector
             elseif direction == "Right" then moveVector = hrp.CFrame.RightVector end
             
-            local endTime = tick() + 0.2
+            local endTime = tick() + 0.15
             while tick() < endTime do
                 humanoid:Move(moveVector, false)
                 task.wait()
             end
+            -- ปล่อยปุ่มเดินอัตโนมัติเมื่อจบลูป ป้องกันเดินค้างไปเอง
+            humanoid:Move(Vector3.new(0,0,0), false)
         end)
     end)
 end
@@ -347,7 +361,7 @@ FlyScriptBtn.Font = Enum.Font.GothamBold; FlyScriptBtn.TextSize = 11; FlyScriptB
 Instance.new("UICorner", FlyScriptBtn).CornerRadius = UDim.new(0, 6)
 FlyScriptBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))() end)
 
--- แผงควบคุมหน้า 4 (จัดระยะห่างเรียบร้อย ปุ่มไม่ทับซ้อนกัน)
+-- แผงควบคุมหน้า 4 (จัดปุ่มเดินทิพย์แบบป้องกันการกดค้าง)
 local function CreateThipBtn(text, size, pos, action, bgColor)
     local Btn = Instance.new("TextButton")
     Btn.Size = size; Btn.Position = pos; Btn.Text = text; Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -367,4 +381,4 @@ CreateThipBtn("🎣 ปุ่มตกปลาทิพย์ (Emergency Cast)"
     pcall(function() ReplicatedStorage.Events.Fishing:FireServer() end)
 end, Color3.fromRGB(150, 80, 0))
 
-print("------- ★ [ppingyyy Hub] Repository Synced & Optimized! ★ -------")
+print("------- ★ [ppingyyy Hub v3.7] Hotfixed & Ready to Use! ★ -------")
