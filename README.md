@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v3.2 - Smooth Animation Edition ]]
--- บันทึกการแก้ไข: เพิ่มระบบ TweenService คุมแอนิเมชันหด/ขยาย UI และแอนิเมชันปุ่มหมวดหมู่ตอนเมาส์ชี้พร้อมเสียงเด้งดึ๋ง
+-- [[ ppingyyy Hub v3.2 - Ultimate Full Animation & Warp Centered Edition ]]
+-- ล็อกเวอร์ชันยาวๆ ไว้ที่ v3.2 ตามสั่ง ห้ามขาด ห้ามเกิน แก้สุดหลอดเพื่อมึงโดยเฉพาะ!
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -7,11 +7,11 @@ local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local TweenService = game:GetService("TweenService") -- เรียกใช้งานพระเอกของงานนี้
+local TweenService = game:GetService("TweenService")
 
 local MainGui = LocalPlayer.PlayerGui:WaitForChild("MainGui")
 
--- ลบ UI เก่าป้องกันการซ้อนทับ
+-- ลบ UI เก่าทิ้งก่อนรัน เผื่อมึงกดรันซ้ำ UI จะได้ไม่ซ้อนจนจอรกรุงรัง
 if CoreGui:FindFirstChild("ppingyyy_MainHub") then
     CoreGui["ppingyyy_MainHub"]:Destroy()
 end
@@ -21,9 +21,9 @@ sg.Name = "ppingyyy_MainHub"
 sg.ResetOnSpawn = false
 sg.Parent = CoreGui
 
--- สร้างอ็อบเจกต์เสียง (ถ้าไม่อยากได้เสียง ให้เปลี่ยน ID หรือปล่อยผ่านได้เลยไอ้ชาย)
+-- ระบบเสียงคลิก/เสียงชี้ เด้งดึ๋งๆ เพิ่มความฟิน
 local ClickSound = Instance.new("Sound")
-ClickSound.SoundId = "rbxassetid://6895079853" -- เสียงกิ๊กๆ ตอนกด/ชี้
+ClickSound.SoundId = "rbxassetid://6895079853"
 ClickSound.Volume = 0.5
 ClickSound.Parent = sg
 
@@ -36,7 +36,7 @@ MainFrame.Size = UDim2.new(0, 420, 0, 270)
 MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true -- บังคับให้ไอเทมข้างในซ่อนตัวตอนหดขนาดหน้าต่าง
+MainFrame.ClipsDescendants = true -- บังคับให้ไอเทมข้างในซ่อนตัวตอนหดหน้าต่างแบบสมูท
 MainFrame.Active = true
 MainFrame.Draggable = true 
 MainFrame.Parent = sg
@@ -80,7 +80,7 @@ PagesArea.Position = UDim2.new(0, 145, 0, 50)
 PagesArea.BackgroundTransparency = 1
 PagesArea.Parent = MainFrame
 
--- สร้าง CanvasGroup ช่วยให้ควบคุมกลุ่มความโปร่งใสตอนจางหายได้เนียนๆ
+-- ใช้ CanvasGroup เพื่อคุมความโปร่งใสตอนจางหาย (Fade Effect) ตอนย่อขนาดเมนู
 local ContentGroup = Instance.new("CanvasGroup")
 ContentGroup.Size = UDim2.new(1, 0, 1, 0)
 ContentGroup.BackgroundTransparency = 1
@@ -106,7 +106,7 @@ Page4_Emergency.Size = UDim2.new(1, 0, 1, 0)
 Page4_Emergency.BackgroundTransparency = 1; Page4_Emergency.ScrollBarThickness = 3
 Page4_Emergency.CanvasSize = UDim2.new(0, 0, 0, 260); Page4_Emergency.Visible = false; Page4_Emergency.Parent = ContentGroup
 
--- ปุ่มย่อ / ปุ่มปิด
+-- ปุ่มย่อหน้าจอ / ปุ่มปิดเมนู
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 25, 0, 25); MinBtn.Position = UDim2.new(0.82, 0, 0, 10)
 MinBtn.Text = "[-]"; MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255); MinBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
@@ -117,17 +117,16 @@ CloseBtn.Size = UDim2.new(0, 25, 0, 25); CloseBtn.Position = UDim2.new(0.9, 0, 0
 CloseBtn.Text = "[X]"; CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255); CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 CloseBtn.Font = Enum.Font.GothamBold; CloseBtn.Parent = MainFrame; Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
--- 🔥 [[ ระบบแอนิเมชันย่อ/ขยายหน้า GUI บานใหญ่แบบสมูท ]]
+-- แอนิเมชันตอนกด ย่อ/ขยาย หน้าเมนูหลักหลักให้สมูทนุ่มลึก
 local isMinimized = false
 local tweenInfoUI = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
-    ClickSound:Play() -- เล่นเสียงตอนกดปุ่มย่อหน้าจอ
+    ClickSound:Play()
     
     if isMinimized then
         MinBtn.Text = "[+]"
-        -- ค่อยๆ หดขนาดความสูงลงมาเหลือ 45 และจางเนื้อหาให้หายไป
         TweenService:Create(MainFrame, tweenInfoUI, {Size = UDim2.new(0, 420, 0, 45)}):Play()
         TweenService:Create(ContentGroup, tweenInfoUI, {GroupTransparency = 1}):Play()
         TweenService:Create(TabBar, tweenInfoUI, {Size = UDim2.new(0, 130, 0, 0)}):Play()
@@ -136,13 +135,13 @@ MinBtn.MouseButton1Click:Connect(function()
     else
         MinBtn.Text = "[-]"
         TabBar.Visible = true
-        -- ค่อยๆ ขยายขนาดความสูงกลับไปเป็น 270 และแสดงเนื้อหาคืนมา
         TweenService:Create(MainFrame, tweenInfoUI, {Size = UDim2.new(0, 420, 0, 270)}):Play()
         TweenService:Create(ContentGroup, tweenInfoUI, {GroupTransparency = 0}):Play()
         TweenService:Create(TabBar, tweenInfoUI, {Size = UDim2.new(0, 130, 1, -55)}):Play()
     end
 end)
 
+-- หน้าต่างยืนยันการลบ GUI (ปุ่มลบเมนูคืนชีพ 100%)
 local ConfirmPanel = Instance.new("Frame")
 ConfirmPanel.Size = UDim2.new(0.94, 0, 0.75, 0); ConfirmPanel.Position = UDim2.new(0.03, 0, 0.2, 0)
 ConfirmPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 25); ConfirmPanel.Visible = false; ConfirmPanel.ZIndex = 10; ConfirmPanel.Parent = MainFrame
@@ -167,7 +166,7 @@ CancelBtn.MouseButton1Click:Connect(function() ConfirmPanel.Visible = false; Cli
 SureBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
 ShutUpBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
 
--- 🔥 [[ ฟังก์ชันสร้างปุ่มหมวดหมู่ + ระบบแอนิเมชันขยายตัวตอนเมาส์ชี้ ]]
+-- ฟังก์ชันสร้างปุ่มหมวดหมู่ซ้ายมือ + แอนิเมชันเด้งขยายร่างเมื่อเมาส์ชี้ (Hover Effect)
 local function CreateTabButton(name, posY, targetPage)
     local TBtn = Instance.new("TextButton")
     TBtn.Size = UDim2.new(1, 0, 0, 30)
@@ -182,16 +181,16 @@ local function CreateTabButton(name, posY, targetPage)
 
     local tweenInfoTab = TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
-    -- เหตุการณ์ตอนเอาเมาส์ชี้ปุ่ม (ขยายใหญ่ขึ้นมานิดนึง + ขยับตำแหน่งมาขวาหน่อยให้ดูเด้ง)
+    -- ตอนเอาเมาส์ลอยมาชี้ ปุ่มจะขยายใหญ่ขึ้นมานิดนึงดึ๋งๆ
     TBtn.MouseEnter:Connect(function()
-        ClickSound:Play() -- เล่นเสียงกิ๊กเบาๆ ตอนเมาส์ชี้หมวดหมู่
+        ClickSound:Play()
         TweenService:Create(TBtn, tweenInfoTab, {
-            Size = UDim2.new(1, 8, 0, 34), -- ขยายทั้งกว้างและสูงขึ้นนิดนึง
-            Position = UDim2.new(0, -4, 0, posY - 2) -- ปรับกึ่งกลางให้สมดุล
+            Size = UDim2.new(1, 8, 0, 34),
+            Position = UDim2.new(0, -4, 0, posY - 2)
         }):Play()
     end)
 
-    -- เหตุการณ์ตอนเมาส์ออกจากปุ่ม (หดกลับขนาดเท่าเดิมเป๊ะๆ)
+    -- ตอนเอาเมาส์ออก ปุ่มจะหดกลับไปขนาดปกติเท่าเดิม
     TBtn.MouseLeave:Connect(function()
         TweenService:Create(TBtn, tweenInfoTab, {
             Size = UDim2.new(1, 0, 0, 30),
@@ -298,7 +297,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ระบบ Smooth Teleport ขยับสั้นๆ แบบเนียนๆ
+-- ระบบ Smooth Teleport ขยับสั้นๆ แบบเนียนๆ กันโดนแอนตี้ชีทเตะ
 local function SmoothWarp(direction)
     pcall(function()
         local char = LocalPlayer.Character
@@ -380,9 +379,9 @@ local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCa
     Btn.Text = (isSkill and ("AUTO " .. keyName .. " : OFF")) or (keyName .. " : OFF")
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255); Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 11; Btn.Parent = parentPage
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
     local Stroke = Instance.new("UIStroke", Btn)
     Stroke.Color = Color3.fromRGB(0, 0, 0); Stroke.Thickness = 1.2
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
 
     Btn.MouseButton1Click:Connect(function()
         ClickSound:Play()
@@ -397,11 +396,13 @@ local function CreateFunctionButton(keyName, posY, parentPage, isSkill, toggleCa
     end)
 end
 
+-- หน้าที่ 1: ออโต้สกิล
 CreateFunctionButton("Z", 5, Page1_Skills, true, function() SkillStates.Z = not SkillStates.Z return SkillStates.Z end)
 CreateFunctionButton("X", 46, Page1_Skills, true, function() SkillStates.X = not SkillStates.X return SkillStates.X end)
 CreateFunctionButton("C", 87, Page1_Skills, true, function() SkillStates.C = not SkillStates.C return SkillStates.C end)
 CreateFunctionButton("V", 128, Page1_Skills, true, function() SkillStates.V = not SkillStates.V return SkillStates.V end)
 
+-- หน้าที่ 2: ออโต้ตกปลา
 CreateFunctionButton("ตกปลาอัตโนมัติ (Auto Cast)", 5, Page2_Fishing, false, function() getgenv().PPINGYYY_AutoCast = not getgenv().PPINGYYY_AutoCast return getgenv().PPINGYYY_AutoCast end)
 CreateFunctionButton("ล็อกเกจตรงกลาง (Auto Catch)", 46, Page2_Fishing, false, function() getgenv().PPINGYYY_Anchor = not getgenv().PPINGYYY_Anchor return getgenv().PPINGYYY_Anchor end)
 
@@ -412,6 +413,7 @@ ManualSellBtn.Font = Enum.Font.GothamBold; ManualSellBtn.TextSize = 11; ManualSe
 Instance.new("UICorner", ManualSellBtn).CornerRadius = UDim.new(0, 6)
 ManualSellBtn.MouseButton1Click:Connect(function() ClickSound:Play(); pcall(function() ReplicatedStorage.Events.SellFish:FireServer("All") end) end)
 
+-- หน้าที่ 3: อำนวยความสะดวก (รวมปุ่ม Copy Pos ที่มึงถามถึง)
 CreateFunctionButton("ปีนกำแพงอัตโนมัติ (Climb Wall)", 5, Page3_Utils, false, function() ClimbWallEnabled = not ClimbWallEnabled return ClimbWallEnabled end)
 CreateFunctionButton("เดินทะลุกำแพงวัตถุ (Noclip)", 46, Page3_Utils, false, function() NoclipEnabled = not NoclipEnabled return NoclipEnabled end)
 
@@ -422,5 +424,7 @@ FlyScriptBtn.Font = Enum.Font.GothamBold; FlyScriptBtn.TextSize = 11; FlyScriptB
 Instance.new("UICorner", FlyScriptBtn).CornerRadius = UDim.new(0, 6)
 FlyScriptBtn.MouseButton1Click:Connect(function() ClickSound:Play(); loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))() end)
 
+-- 🔥 [[ ปุ่มก๊อปปี้พิกัดอยู่ตรงนี้ สบายใจได้ กูแถมแอนิเมชันเปลี่ยนสีบอกสถานะให้ด้วย ]]
 local CopyPosBtn = Instance.new("TextButton")
-CopyPosBtn.Size = UDim2.new(0.93, 0, 0, 36); 
+CopyPosBtn.Size = UDim2.new(0.93, 0, 0, 36); CopyPosBtn.Position = UDim2.new(0, 0, 0, 128)
+CopyPosBtn
