@@ -1,5 +1,5 @@
--- [[ ppingyyy Hub v3.5 - Natural Walk Update ]]
--- เปลี่ยนระบบเดินทิพย์หน้า 4 ให้เป็นการสั่งเดินแบบปกติ (ขยับตัวตามฟิสิกส์เกม ไม่ใช่วาร์ป CFrame)
+-- [[ ppingyyy Hub v3.6 - Anti-Crash Physics Update ]]
+-- แก้ไขบั๊กรันสคริปต์ไม่ติด โดยเปลี่ยนจาก VirtualInputManager มาใช้ Humanoid:Move() บังคับเดินตามฟิสิกส์แทน
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -46,7 +46,7 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.5, 0, 0, 45)
 Title.Position = UDim2.new(0.04, 0, 0, 0)
-Title.Text = "★ PPINGYYY HUB v3.5 (Natural Thip)"
+Title.Text = "★ PPINGYYY HUB v3.6 (Anti-Crash)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -324,35 +324,41 @@ RunService.Stepped:Connect(function()
 end)
 
 -- ====================================================================
--- [🔥 ปรับปรุงใหม่: ฟังก์ชันเดินทิพย์แบบธรรมชาติ ไม่ใช่วาร์ป!]
+-- [🔥 อัปเดตใหม่ v3.6: ใช้ฟิสิกส์ Humanoid:Move บังคับเดิน ไร้การวาร์ป ไม่หลุดสคริปต์]
 -- ====================================================================
--- ใช้ระบบจำลองการกดคีย์บอร์ดเสมือน ตัวละครจะก้าวเดินตามปกติของเกม ไม่เกิดการวาร์ปกระตุก
-local function ThipNaturalMove(direction)
+local function ThipPhysicsMove(direction)
     pcall(function()
         local char = LocalPlayer.Character
-        if not char or not char:FindFirstChildOfClass("Humanoid") then return end
-        
-        local targetKey = nil
-        if direction == "Up" then
-            targetKey = Enum.KeyCode.W
-        elseif direction == "Down" then
-            targetKey = Enum.KeyCode.S
-        elseif direction == "Left" then
-            targetKey = Enum.KeyCode.A
-        elseif direction == "Right" then
-            targetKey = Enum.KeyCode.D
-        elseif direction == "Jump" then
-            targetKey = Enum.KeyCode.Space
+        if not char then return end
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not humanoid or not hrp then return end
+
+        if direction == "Jump" then
+            humanoid.Jump = true -- สั่งกระโดดทิพย์แบบปกติ (ถ้าปุ่มในเกมพัง ตัวละครจะเด้งโดดตามกายภาพ)
+            return
         end
 
-        if targetKey then
-            task.spawn(function()
-                -- สั่งกดปุ่มค้างไว้แป๊บนึงเพื่อให้ตัวละครเคลื่อนที่เดินไปข้างหน้าอย่างสมจริง
-                VirtualInputManager:SendKeyEvent(true, targetKey, false, game)
-                task.wait(0.25) -- ระยะเวลาในการก้าวเดินต่อการกด 1 ครั้ง (ปรับเพิ่มลดความยาวของการก้าวได้)
-                VirtualInputManager:SendKeyEvent(false, targetKey, false, game)
-            end)
-        end
+        -- บังคับเคลื่อนที่ตามทิศทางมุมกล้องและฟิสิกส์ (เคลื่อนที่ทีละนิด ไม่ใช่วาร์ป)
+        task.spawn(function()
+            local moveVector = Vector3.new(0, 0, 0)
+            if direction == "Up" then
+                moveVector = hrp.CFrame.LookVector
+            elseif direction == "Down" then
+                moveVector = -hrp.CFrame.LookVector
+            elseif direction == "Left" then
+                moveVector = -hrp.CFrame.RightVector
+            elseif direction == "Right" then
+                moveVector = hrp.CFrame.RightVector
+            end
+            
+            -- สั่งให้ Humanoid เดินไปตามทิศทางนั้นเป็นเวลา 0.2 วินาที (ก้าวเดินเนียน ๆ)
+            local endTime = tick() + 0.2
+            while tick() < endTime do
+                humanoid:Move(moveVector, false)
+                task.wait()
+            end
+        end)
     end)
 end
 
@@ -429,7 +435,7 @@ ResetMoveBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ====================================================================
--- [6. ส่วนปุ่มหน้า 4 - แผงควบคุมระบบก้าวเดินธรรมชาติ (เนียนตา ไม่วาร์ป)]
+-- [6. ส่วนปุ่มหน้า 4 - แผงควบคุมระบบฟิสิกส์ก้าวเดินธรรมชาติ (แก้ค้างชัวร์)]
 -- ====================================================================
 local function CreateThipBtn(text, size, pos, action, bgColor)
     local Btn = Instance.new("TextButton")
@@ -443,7 +449,5 @@ local function CreateThipBtn(text, size, pos, action, bgColor)
     Btn.MouseButton1Click:Connect(action)
 end
 
--- ปุ่มกดสไตล์ D-Pad บังคับเดินแบบสมจริง 
-CreateThipBtn("▲ บนทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0, 5), function() ThipNaturalMove("Up") end)
-CreateThipBtn("◀ ซ้ายทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 5, 0, 40), function() ThipNaturalMove("Left") end)
-CreateThipBtn("🦘 โดดทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 8
+-- แผงจอยปุ่มเดินแบบฟิสิกส์ ไม่พึ่งพา Virtual Input อีกต่อไป
+CreateThipBtn("▲ บนทิพย์", UDim2.new(0, 70, 0, 30), UDim2.new(0, 80, 0,
