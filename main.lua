@@ -1,4 +1,4 @@
--- [[ ★PPINGYYY HUB★ - FLY GUI INTEGRATED VERSION ]] --
+-- [[ ★PPINGYYY HUB★ - EMERGENCY PHANTOM BUTTONS VERSION ]] --
 local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -12,16 +12,19 @@ getgenv().NWKZ_AutoCast = false
 getgenv().PP_Noclip = false
 getgenv().PP_WalkSpeed = 16
 
--- ตัวแปรระบบสกิลออโต้
+-- ตัวแปรระบบสกิลออโต้ (ปรับดีเลย์ให้ฉลาดขึ้น ไม่ทำตัวแข็ง)
 getgenv().PP_AutoSkillAll = false
 getgenv().PP_Skill_Z = false
 getgenv().PP_Skill_X = false
 getgenv().PP_Skill_C = false
 getgenv().PP_Skill_V = false
 
+-- ตัวแปรระบบฉุกเฉิน (ระบบทิพย์)
+getgenv().PP_FishingThipActive = false
+
 local skillKeys = {Enum.KeyCode.Z, Enum.KeyCode.X, Enum.KeyCode.C, Enum.KeyCode.V}
 
--- [[ 1. สร้าง ScreenGui ]] --
+-- [[ 1. สร้าง ScreenGui หลัก ]] --
 local sg = Instance.new("ScreenGui")
 sg.Name = "PPINGYYY_Hub_Ultimate"
 sg.ResetOnSpawn = false
@@ -33,11 +36,11 @@ if not success then
     sg.Parent = lp:WaitForChild("PlayerGui")
 end
 
-local MainSize = UDim2.new(0, 420, 0, 180)
+local MainSize = UDim2.new(0, 420, 0, 240) -- ขยายขนาดนิดนึงเพื่อรองรับ 4 หมวดหมู่
 local MinimizedSize = UDim2.new(0, 420, 0, 40)
 local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 
--- [[ 2. หน้าต่างหลัก พร้อมกรอบสีเขียวล้อมรอบทั้งแผ่น ]] --
+-- [[ 2. หน้าต่างหลัก พร้อมกรอบสีเขียว ]] --
 local Main = Instance.new("Frame", sg)
 Main.Size = MainSize
 Main.Position = UDim2.new(0.1, 0, 0.3, 0)
@@ -102,20 +105,21 @@ Pages.BackgroundTransparency = 1
 
 local function createTabButton(text, posIndex)
     local btn = Instance.new("TextButton", Sidebar)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Position = UDim2.new(0.05, 0, 0, 10 + (posIndex * 40))
+    btn.Size = UDim2.new(0.9, 0, 0, 30)
+    btn.Position = UDim2.new(0.05, 0, 0, 5 + (posIndex * 34))
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(150, 150, 150)
     btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 11
+    btn.TextSize = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     return btn
 end
 
 local Tab1Btn = createTabButton("🎣 ตกปลาออโต้", 0)
 local Tab2Btn = createTabButton("⚡ สุ่มสกิล", 1)
-local Tab3Btn = createTabButton("🛠️ อำนวยความสะดวก", 2)
+local Tab3Btn = createTabButton("🛠️ อำนวยสะดวก", 2)
+local Tab4Btn = createTabButton("🚨 หมวดฉุกเฉิน", 3) -- แท็บใหม่แกะกล่อง!
 
 local function createPage()
     local page = Instance.new("ScrollingFrame", Pages)
@@ -131,6 +135,7 @@ end
 local Page1 = createPage()
 local Page2 = createPage()
 local Page3 = createPage()
+local Page4 = createPage()
 
 -- [[ 5. ปุ่มหมวดหมู่ที่ 1 (ตกปลาออโต้) ]] --
 local AnchorBtn = Instance.new("TextButton", Page1)
@@ -233,7 +238,6 @@ SpeedDownBtn.TextColor3 = Color3.new(1, 1, 1)
 SpeedDownBtn.Font = Enum.Font.GothamBold
 Instance.new("UICorner", SpeedDownBtn)
 
--- 🔥 ปุ่มเปิดใช้สคริปต์บิน FLY GUI ตามสั่ง
 local FlyBtn = Instance.new("TextButton", Page3)
 FlyBtn.Size = UDim2.new(1, -10, 0, 35)
 FlyBtn.Position = UDim2.new(0, 0, 0, 115)
@@ -243,7 +247,58 @@ FlyBtn.TextColor3 = Color3.new(1, 1, 1)
 FlyBtn.Font = Enum.Font.GothamBold
 Instance.new("UICorner", FlyBtn)
 
--- [[ 8. ระบบสลับแท็บเมนู ]] --
+-- [[ 8. ปุ่มหมวดหมู่ที่ 4 (🚨 หมวดฉุกเฉิน - ระบบทิพย์แก้บั๊กตัวแข็ง) ]] --
+local WalkThipBtn = Instance.new("TextButton", Page4)
+WalkThipBtn.Size = UDim2.new(1, -10, 0, 35)
+WalkThipBtn.Position = UDim2.new(0, 0, 0, 5)
+WalkThipBtn.Text = "🏃 เดินทิพย์ (วาร์ปเนียนไปข้างหน้า)"
+WalkThipBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+WalkThipBtn.TextColor3 = Color3.fromRGB(0, 255, 150)
+WalkThipBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", WalkThipBtn)
+
+local JumpThipBtn = Instance.new("TextButton", Page4)
+JumpThipBtn.Size = UDim2.new(1, -10, 0, 35)
+JumpThipBtn.Position = UDim2.new(0, 0, 0, 45)
+JumpThipBtn.Text = "🦘 กระโดดทิพย์ (แก้ล็อกตัวแข็ง)"
+JumpThipBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+JumpThipBtn.TextColor3 = Color3.fromRGB(0, 255, 150)
+JumpThipBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", JumpThipBtn)
+
+local FishThipBtn = Instance.new("TextButton", Page4)
+FishThipBtn.Size = UDim2.new(1, -10, 0, 35)
+FishThipBtn.Position = UDim2.new(0, 0, 0, 85)
+FishThipBtn.Text = "🟢 ตกปลาทิพย์ (เปิดปุ่มสแปมขวาจอ): OFF"
+FishThipBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+FishThipBtn.TextColor3 = Color3.new(1, 1, 1)
+FishThipBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", FishThipBtn)
+
+
+-- [[ 9. สร้าง "ปุ่มวงกลมตกปลาทิพย์" แยกต่างหากไว้มุมขวาของจอ ]] --
+local ThipGui = Instance.new("ScreenGui")
+ThipGui.Name = "PP_PhantomFishingGui"
+ThipGui.ResetOnSpawn = false
+pcall(function() ThipGui.Parent = game:GetService("CoreGui") end)
+
+local RealFishBtn = Instance.new("TextButton", ThipGui)
+RealFishBtn.Size = UDim2.new(0, 90, 0, 90)
+RealFishBtn.Position = UDim2.new(0.82, 0, 0.62, 0) -- พิกัดมุมขวาล่างตรงปุ่มตกปลาของเกมเป๊ะๆ
+RealFishBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+RealFishBtn.Text = "ตกปลา\nทิพย์"
+RealFishBtn.TextColor3 = Color3.fromRGB(10, 10, 15)
+RealFishBtn.Font = Enum.Font.GothamBold
+RealFishBtn.TextSize = 16
+RealFishBtn.Visible = false
+Instance.new("UICorner", RealFishBtn).CornerRadius = UDim.new(1, 0) -- วงกลมดิ๊ก
+
+local ThipStroke = Instance.new("UIStroke", RealFishBtn)
+ThipStroke.Color = Color3.fromRGB(255, 255, 255)
+ThipStroke.Thickness = 3
+
+
+-- [[ 10. ระบบสลับแท็บเมนู ]] --
 local activePage = nil local activeBtn = nil
 local function showPage(targetPage, targetBtn)
     if activePage == targetPage then return end
@@ -254,9 +309,11 @@ end
 Tab1Btn.MouseButton1Click:Connect(function() showPage(Page1, Tab1Btn) end)
 Tab2Btn.MouseButton1Click:Connect(function() showPage(Page2, Tab2Btn) end)
 Tab3Btn.MouseButton1Click:Connect(function() showPage(Page3, Tab3Btn) end)
+Tab4Btn.MouseButton1Click:Connect(function() showPage(Page4, Tab4Btn) end)
 showPage(Page1, Tab1Btn)
 
--- [[ 9. ฟังก์ชันปุ่มต่างๆ ]] --
+
+-- [[ 11. ฟังก์ชันปุ่มกดระบบต่าง ๆ ]] --
 local isMinimized = false
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
@@ -265,8 +322,8 @@ MinBtn.MouseButton1Click:Connect(function()
 end)
 
 CloseBtn.MouseButton1Click:Connect(function()
-    getgenv().NWKZ_Anchor = false getgenv().NWKZ_AutoCast = false getgenv().PP_Noclip = false getgenv().PP_AutoSkillAll = false
-    sg:Destroy()
+    getgenv().NWKZ_Anchor = false getgenv().NWKZ_AutoCast = false getgenv().PP_Noclip = false getgenv().PP_AutoSkillAll = false getgenv().PP_FishingThipActive = false
+    RealFishBtn.Visible = false sg:Destroy() ThipGui:Destroy()
 end)
 
 AnchorBtn.MouseButton1Click:Connect(function()
@@ -308,24 +365,66 @@ SpeedDownBtn.MouseButton1Click:Connect(function()
     SpeedLabel.Text = "WALKSPEED (ความเร็วเดิน): " .. tostring(getgenv().PP_WalkSpeed)
 end)
 
--- โหลดสคริปต์บินนอกตาม URL ที่กำหนดเมื่อกดปุ่ม
 FlyBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))()
-    end)
-    FlyBtn.Text = "🚀 FLY LOADED!"
-    task.wait(1)
-    FlyBtn.Text = "🚀 FLY GUI (เปิดโปรบิน)"
+    pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V11-205450"))() end)
+    FlyBtn.Text = "🚀 FLY LOADED!" task.wait(1) FlyBtn.Text = "🚀 FLY GUI (เปิดโปรบิน)"
 end)
 
--- [[ 10. Loops หลังบ้านระบบเบื้องหลัง ]] --
+-- [[ ฟังก์ชันระบบทิพย์ฉุกเฉิน ]] --
+
+-- 1. เดินทิพย์ (วาร์ปไปทิศหน้าจอแบบเนียนๆ)
+WalkThipBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local char = lp.Character local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChild("Humanoid")
+        if hrp and hum then
+            -- วาร์ปไปข้างหน้าตามมุมกล้อง/ทิศทางการเดิน 3 สตัดแบบเนียนกริบ
+            local moveDir = hum.MoveDirection.Magnitude > 0 and hum.MoveDirection or hrp.CFrame.LookVector
+            hrp.CFrame = hrp.CFrame + (moveDir * 3)
+        end
+    end)
+end)
+
+-- 2. กระโดดทิพย์ (ใช้ฟิสิกส์บังคับแก้ล็อกคีย์บอร์ดแข็ง)
+JumpThipBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local char = lp.Character local hum = char and char:FindFirstChild("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end)
+end)
+
+-- 3. ตกปลาทิพย์ (เปิด/ปิด ปุ่มวงกลมแยกหน้าต่างซ้ายขวา)
+FishThipBtn.MouseButton1Click:Connect(function()
+    getgenv().PP_FishingThipActive = not getgenv().PP_FishingThipActive
+    RealFishBtn.Visible = getgenv().PP_FishingThipActive
+    FishThipBtn.Text = "🟢 ตกปลาทิพย์ (เปิดปุ่มสแปมขวาจอ): " .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
+    FishThipBtn.BackgroundColor3 = getgenv().PP_FishingThipActive and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(150, 0, 0)
+end)
+
+-- แอ็กชันเมื่อมึงเอานิ้วกดปุ่มวงกลมตกปลาทิพย์ขวาจอ
+RealFishBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        if RS:FindFirstChild("Events") and RS.Events:FindFirstChild("Fishing") then
+            RS.Events.Fishing:FireServer()
+        elseif RS:FindFirstChild("Fishing") then
+            RS.Fishing:FireServer()
+        end
+    end)
+    -- เอฟเฟกต์กระพริบตอนกด
+    RealFishBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    task.wait(0.05)
+    RealFishBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+end)
+
+
+-- [[ 12. Loops เบื้องหลัง - ปรับแต่งไม่ให้แย่งคีย์บอร์ด ]] --
 task.spawn(function()
-    while task.wait(0.2) do 
+    while task.wait(0.4) do -- ปรับความถี่ดีเลย์ขึ้นจาก 0.2 เป็น 0.4 ไม่ให้ปุ่มล็อก คีย์บอร์ดไม่ค้าง เดินขยับได้ปกติชัวร์!
         pcall(function()
             if getgenv().PP_AutoSkillAll then
                 local randomKey = skillKeys[math.random(1, #skillKeys)]
                 VirtualInputManager:SendKeyEvent(true, randomKey, false, game)
-                task.wait(0.05)
+                task.wait(0.02)
                 VirtualInputManager:SendKeyEvent(false, randomKey, false, game)
             end
             if getgenv().PP_Skill_Z then VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Z, false, game) task.wait(0.02) VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Z, false, game) end
@@ -346,14 +445,19 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- ออโต้เบ็ดตกปลา (ปรับให้ไม่ส่งรัวจนปุ่มหาย)
 task.spawn(function()
-    while task.wait(0.45) do 
+    while task.wait(1.2) do -- ปรับเวลาคูลดาวน์ให้ส่งรีเควสต์ฉลาดขึ้น ปุ่มแท้ของเกมจะได้ไม่เอ๋อหายไปอีก
         if getgenv().NWKZ_AutoCast then
             pcall(function()
                 local MainGui = lp.PlayerGui:FindFirstChild("MainGui")
                 local char = lp.Character
                 if char and MainGui and MainGui:FindFirstChild("Fishing") then
-                    if not char:GetAttribute("Fishing") and not MainGui.Fishing.Visible then RS.Events.Fishing:FireServer() end
+                    if not char:GetAttribute("Fishing") and not MainGui.Fishing.Visible then 
+                        if RS:FindFirstChild("Events") and RS.Events:FindFirstChild("Fishing") then
+                            RS.Events.Fishing:FireServer()
+                        end
+                    end
                 end
             end)
         end
@@ -367,29 +471,4 @@ RunService.RenderStepped:Connect(function()
             if MainGui and MainGui:FindFirstChild("Fishing") and MainGui.Fishing.Visible then
                 local bar = MainGui.Fishing.BarFrame.Bar
                 bar.Position = UDim2.new(0.5, 0, bar.Position.Y.Scale, 0)
-                if RS:FindFirstChild("Fishing") then RS.Fishing:FireServer("1") end
-            end
-        end)
-    end
-    pcall(function()
-        if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-            lp.Character.Humanoid.WalkSpeed = getgenv().PP_WalkSpeed
-        end
-    end)
-end)
-
--- [[ 11. ระบบลากหน้าต่าง ]] --
-local dragging, dragInput, dragStart, startPos
-local function update(input)
-    local delta = input.Position - dragStart
-    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-TitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true dragStart = input.Position startPos = Main.Position
-        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
-    end
-end)
-TitleBar.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
-UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then update(input) end end)
-
+                if RS:FindFirstChild
