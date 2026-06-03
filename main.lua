@@ -1,4 +1,4 @@
--- [[ ★PPINGYYY HUB★ - GREEN BORDER RESTORED ]] --
+-- [[ ★PPINGYYY HUB★ - TABS ANIMATION + GREEN BORDER ]] --
 local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -27,7 +27,7 @@ local tweenInfoTab = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirec
 
 -- [[ 1. สร้าง ScreenGui หลัก ]] --
 local sg = Instance.new("ScreenGui")
-sg.Name = "PPINGYYY_Hub_BorderRestored"
+sg.Name = "PPINGYYY_Hub_PerfectEdition"
 sg.ResetOnSpawn = false
 
 local success, err = pcall(function()
@@ -47,12 +47,12 @@ Main.Size = MainSize
 Main.Position = UDim2.new(0.1, 0, 0.3, 0)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 17)
 Main.BorderSizePixel = 0
-Main.ClipsDescendants = false -- ปรับเป็น false เพื่อให้กรอบแสงไม่โดนตัด
+Main.ClipsDescendants = false -- ปรับเป็น false เพื่อให้กรอบแสงไม่โดนตัดขาด
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 
--- ✨ ยัดกรอบสีเขียวสะท้อนแสง (UIStroke) กลับคืนสู่มาตุภูมิ! ✨
+-- ✨ ใส่กรอบตกแต่งสีเขียวเรืองแสงรอบหน้าต่างสคริปต์กลับมาแล้ว ✨
 local MainBorder = Instance.new("UIStroke", Main)
-MainBorder.Color = Color3.fromRGB(0, 255, 150) -- สีเขียว PPINGYYY Signature
+MainBorder.Color = Color3.fromRGB(0, 255, 150) -- สีเขียว Signature ของ PPINGYYY HUB
 MainBorder.Thickness = 2
 MainBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
@@ -137,7 +137,7 @@ local Page1 = createPage()
 local Page2 = createPage()
 local Page3 = createPage()
 
--- ระบบอนิเมชั่นสลับแท็บ
+-- 🔄 ระบบอนิเมชั่นสลับแท็บหมวดหมู่ (ยืดหดสวยงามตามที่คุยไว้ตอนแรก)
 local activePage = nil local activeBtn = nil
 local function showPage(targetPage, targetBtn, posIndex)
     if activePage == targetPage then return end
@@ -170,7 +170,7 @@ Tab1Btn.MouseButton1Click:Connect(function() showPage(Page1, Tab1Btn, 0) end)
 Tab2Btn.MouseButton1Click:Connect(function() showPage(Page2, Tab2Btn, 1) end)
 Tab3Btn.MouseButton1Click:Connect(function() showPage(Page3, Tab3Btn, 2) end)
 
--- ฟังก์ชันสร้างปุ่มแบบธรรมดา เสถียร เปลี่ยนสี ON/OFF ได้ปกติ
+-- ฟังก์ชันสร้างปุ่มข้างในแบบปกติ (ไม่มีอนิเมชั่น สลับสี ON/OFF ได้ชัดเจน)
 local function createNormalButton(parent, text, yPos)
     local btn = Instance.new("TextButton", parent)
     btn.Size = UDim2.new(0.95, 0, 0, 32)
@@ -282,7 +282,7 @@ RealFishBtn.Visible = false
 RealFishBtn.BorderSizePixel = 0
 Instance.new("UICorner", RealFishBtn).CornerRadius = UDim.new(1, 0)
 
--- [[ 9. คลิกทำงานปุ่มเปิด/ปิด สลับสีปกติ ]] --
+-- [[ 9. คลิกทำงานปุ่มเปิด/ปิด เปลี่ยนสี แดง/เขียว ตามปกติ ]] --
 CastBtn.MouseButton1Click:Connect(function()
     getgenv().NWKZ_AutoCast = not getgenv().NWKZ_AutoCast
     CastBtn.Text = "AUTO CAST (เหวี่ยงเบ็ดออโต้): " .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
@@ -314,7 +314,7 @@ NoclipBtn.MouseButton1Click:Connect(function()
     NoclipBtn.BackgroundColor3 = getgenv().PP_Noclip and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(150, 0, 0)
 end)
 
--- ฟังก์ชันเสริมอื่น ๆ
+-- ฟังก์ชันปุ่มอื่น ๆ
 SellBtn.MouseButton1Click:Connect(function()
     pcall(function() if RS:FindFirstChild("Events") and RS.Events:FindFirstChild("SellFish") then RS.Events.SellFish:FireServer("All") end end)
     SellBtn.Text = "SOLD OUT!" task.wait(0.5) SellBtn.Text = "💰 SELL ALL (ขายปลาทั้งหมด)"
@@ -372,5 +372,48 @@ task.spawn(function()
             end
             if getgenv().PP_Skill_Z then VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Z, false, game) task.wait(0.02) VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Z, false, game) end
             if getgenv().PP_Skill_X then VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.X, false, game) task.wait(0.02) VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.X, false, game) end
-            if getgenv().PP_Skill_C then VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.C, false, game) task.wait(0.02) VirtualInputManager:SendKeyEvent(false, Enum.
+            if getgenv().PP_Skill_C then VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.C, false, game) task.wait(0.02) VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.C, false, game) end
+            if getgenv().PP_Skill_V then VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.V, false, game) task.wait(0.02) VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.V, false, game) end
+        end)
+    end
+end)
 
+RunService.Stepped:Connect(function()
+    if getgenv().PP_Noclip and lp.Character then
+        pcall(function()
+            for _, part in ipairs(lp.Character:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while task.wait(1.5) do 
+        if getgenv().NWKZ_AutoCast then
+            pcall(function()
+                local MainGui = lp.PlayerGui:FindFirstChild("MainGui")
+                local char = lp.Character
+                if char and MainGui and MainGui:FindFirstChild("Fishing") then
+                    if not char:GetAttribute("Fishing") and not MainGui.Fishing.Visible then 
+                        if RS:FindFirstChild("Events") and RS.Events:FindFirstChild("Fishing") then RS.Events.Fishing:FireServer() end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if getgenv().NWKZ_Anchor then
+        pcall(function()
+            local MainGui = lp.PlayerGui:FindFirstChild("MainGui")
+            if MainGui and MainGui:FindFirstChild("Fishing") and MainGui.Fishing.Visible then
+                local bar = MainGui.Fishing.BarFrame.Bar
+                bar.Position = UDim2.new(0.5, 0, bar.Position.Y.Scale, 0)
+                if RS:FindFirstChild("Fishing") then RS.Fishing:FireServer("1") end
+            end
+        end)
+    end
+    pcall(function()
+        if lp.Character and
