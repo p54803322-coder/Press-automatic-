@@ -1,4 +1,4 @@
--- [[ ★PPINGYYY HUB★ - SMOOTH ANIMATION EDITION ]] --
+-- [[ ★PPINGYYY HUB★ - SMOOTH ANIMATION EDITION (Fixed Position) ]] --
 local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -54,7 +54,6 @@ Main.BorderSizePixel = 0
 Main.ClipsDescendants = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- ✨ กรอบตกแต่งสีเขียวเรืองแสง (UIStroke) ล้อมรอบสวยงาม ✨
 local MainBorder = Instance.new("UIStroke", Main)
 MainBorder.Color = Color3.fromRGB(0, 255, 150)
 MainBorder.Thickness = 2
@@ -99,7 +98,6 @@ Container.Size = UDim2.new(1, 0, 1, -40)
 Container.Position = UDim2.new(0, 0, 0, 40)
 Container.BackgroundTransparency = 1
 
--- เปิด ClipsDescendants เฉพาะใน Sidebar เพื่อความเนียนเวลาปุ่มขยายตัว
 local Sidebar = Instance.new("Frame", Container)
 Sidebar.Size = UDim2.new(0, 120, 1, 0)
 Sidebar.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
@@ -121,7 +119,7 @@ local function createTabButton(text, posIndex)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    btn:SetAttribute("Index", posIndex) -- เก็บตำแหน่งไว้ใช้คำนวณแอนิเมชั่น
+    btn:SetAttribute("Index", posIndex)
     return btn
 end
 
@@ -144,18 +142,13 @@ local Page1 = createPage()
 local Page2 = createPage()
 local Page3 = createPage()
 
--- 🔄 [ระบบอนิเมชั่นสลับแท็บแบบเด้งดึ๋ง Elastic] 🔄
 local activePage = nil 
 local activeBtn = nil
 
 local function showPage(targetPage, targetBtn)
     if activePage == targetPage then return end
-    
-    -- ตั้งค่า Config อนิเมชั่นปุ่ม (เด้งดึ๋ง Elastic) และ อนิเมชั่นหน้ากระดาษ (ลื่นไหล)
     local tweenInfoElastic = TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
     local tweenInfoPage = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    
-    -- หดปุ่มเก่ากลับไปสภาพเดิม
     if activeBtn then
         local oldIndex = activeBtn:GetAttribute("Index") or 0
         TweenService:Create(activeBtn, tweenInfoElastic, {
@@ -165,8 +158,6 @@ local function showPage(targetPage, targetBtn)
             BackgroundColor3 = Color3.fromRGB(20, 20, 25)
         }):Play()
     end
-    
-    -- ขยายปุ่มใหม่ให้ยาวเด่นเด้งดึ๋งอกมานอกขอบ
     local newIndex = targetBtn:GetAttribute("Index") or 0
     TweenService:Create(targetBtn, tweenInfoElastic, {
         Size = UDim2.new(1.05, 0, 0, 35),
@@ -174,22 +165,12 @@ local function showPage(targetPage, targetBtn)
         TextColor3 = Color3.fromRGB(0, 255, 150),
         BackgroundColor3 = Color3.fromRGB(25, 40, 32)
     }):Play()
-    
     activeBtn = targetBtn
-    
-    -- อนิเมชั่นสลับหน้า (ค่อย ๆ เลื่อนขึ้นบน + Fade ตัวหนังสือกริ๊บ ๆ)
-    if activePage then 
-        activePage.Visible = false 
-    end
-    
-    targetPage.Position = UDim2.new(0, 0, 0, 15) -- เริ่มจากเยื้องล่างเล็กน้อย
+    if activePage then activePage.Visible = false end
+    targetPage.Position = UDim2.new(0, 0, 0, 15)
     targetPage.CanvasPosition = Vector2.new(0, 0)
     targetPage.Visible = true
-    
-    TweenService:Create(targetPage, tweenInfoPage, {
-        Position = UDim2.new(0, 0, 0, 0) -- เลื่อนขึ้นพิกัดปกติ
-    }):Play()
-    
+    TweenService:Create(targetPage, tweenInfoPage, {Position = UDim2.new(0, 0, 0, 0)}):Play()
     activePage = targetPage
 end
 
@@ -197,7 +178,6 @@ Tab1Btn.MouseButton1Click:Connect(function() showPage(Page1, Tab1Btn) end)
 Tab2Btn.MouseButton1Click:Connect(function() showPage(Page2, Tab2Btn) end)
 Tab3Btn.MouseButton1Click:Connect(function() showPage(Page3, Tab3Btn) end)
 
--- ฟังก์ชันสร้างปุ่มเมนูด้านในสคริปต์
 local function createNormalButton(parent, text, yPos)
     local btn = Instance.new("TextButton", parent)
     btn.Size = UDim2.new(0.95, 0, 0, 32)
@@ -211,7 +191,6 @@ local function createNormalButton(parent, text, yPos)
     return btn
 end
 
--- [[ 5. หมวดหมู่ที่ 1 (🎣 ตกปลาออโต้) ]] --
 local CastBtn = createNormalButton(Page1, "AUTO CAST (เหวี่ยงเบ็ดออโต้): OFF", 5)
 local AnchorBtn = createNormalButton(Page1, "ANCHOR (ทำให้แถบอยู่ตรงกลาง): OFF", 42)
 local FishThipBtn = createNormalButton(Page1, "🟢 เปิดปิดปุ่มตกปลาทิพย์ (ขวาจอ): OFF", 79)
@@ -226,7 +205,6 @@ SellBtn.Font = Enum.Font.GothamBold
 SellBtn.TextSize = 10
 Instance.new("UICorner", SellBtn).CornerRadius = UDim.new(0, 6)
 
--- [[ 6. หมวดหมู่ที่ 2 (⚡ สกิลอัตโนมัติ) ]] --
 local SkillAllBtn = createNormalButton(Page2, "AUTO ALL SKILLS (รวมกดทุกสกิล): OFF", 5)
 
 local function createGridSkillBtn(keyName, posIndex, varName)
@@ -241,7 +219,6 @@ local function createGridSkillBtn(keyName, posIndex, varName)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-    
     btn.MouseButton1Click:Connect(function()
         getgenv()[varName] = not getgenv()[varName]
         btn.Text = "AUTO SKILL ["..keyName.."]: " .. (getgenv()[varName] and "ON" or "OFF")
@@ -254,7 +231,6 @@ createGridSkillBtn("Z", 1, "PP_Skill_Z")
 createGridSkillBtn("X", 2, "PP_Skill_X")
 createGridSkillBtn("C", 3, "PP_Skill_C")
 
--- [[ 7. หมวดหมู่ที่ 3 (🛠️ อำนวยสะดวก) ]] --
 local NoclipBtn = createNormalButton(Page3, "NOCLIP (ทะลุกำแพง): OFF", 5)
 
 local SpeedLabel = Instance.new("TextLabel", Page3)
@@ -296,10 +272,10 @@ FlyBtn.Font = Enum.Font.GothamBold
 FlyBtn.TextSize = 10
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 6)
 
--- [[ 8. ปุ่มวงกลมตกปลาทิพย์ ]] --
+-- [[ 8. ปุ่มวงกลมตกปลาทิพย์ (ปรับพิกัดให้ตรงไอคอนแกลเลอรี) ]] --
 local RealFishBtn = Instance.new("TextButton", sg)
 RealFishBtn.Size = UDim2.new(0, 95, 0, 95)
-RealFishBtn.Position = UDim2.new(0.82, 0, 0.60, 0)
+RealFishBtn.Position = UDim2.new(0.85, 0, 0.40, 0) -- แก้เลขตรงนี้ให้ทับดอกไม้แล้ว!
 RealFishBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 RealFishBtn.Text = "ตกปลา\nทิพย์"
 RealFishBtn.TextColor3 = Color3.fromRGB(10, 10, 15)
@@ -309,7 +285,7 @@ RealFishBtn.Visible = false
 RealFishBtn.BorderSizePixel = 0
 Instance.new("UICorner", RealFishBtn).CornerRadius = UDim.new(1, 0)
 
--- [[ 9. คลิกทำงานปุ่มเปิด/ปิด เปลี่ยนสี แดง/เขียว ]] --
+-- ส่วนที่เหลือคงเดิมทั้งหมด
 CastBtn.MouseButton1Click:Connect(function()
     getgenv().NWKZ_AutoCast = not getgenv().NWKZ_AutoCast
     CastBtn.Text = "AUTO CAST (เหวี่ยงเบ็ดออโต้): " .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
@@ -341,7 +317,6 @@ NoclipBtn.MouseButton1Click:Connect(function()
     NoclipBtn.BackgroundColor3 = getgenv().PP_Noclip and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(150, 0, 0)
 end)
 
--- ปุ่มเสริมระบบอื่น ๆ
 SellBtn.MouseButton1Click:Connect(function()
     pcall(function() 
         if RS:FindFirstChild("Events") and RS.Events:FindFirstChild("SellFish") then RS.Events.SellFish:FireServer("All") 
@@ -375,10 +350,8 @@ RealFishBtn.MouseButton1Click:Connect(function()
     RealFishBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 end)
 
--- แสดงหน้าแรกอัตโนมัติพร้อมแอนิเมชั่น
 showPage(Page1, Tab1Btn)
 
--- [[ 10. ระบบย่อ/ปิด หน้าต่างหลัก ]] --
 local isMinimized = false
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
@@ -400,7 +373,6 @@ CloseBtn.MouseButton1Click:Connect(function()
     RealFishBtn.Visible = false sg:Destroy()
 end)
 
--- [[ 11. Loops เบื้องหลัง ]] --
 task.spawn(function()
     while task.wait(0.1) do 
         pcall(function()
@@ -460,7 +432,6 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
--- [[ 12. ระบบลากหน้าต่าง GUI ]] --
 local dragging, dragInput, dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
