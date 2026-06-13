@@ -1,4 +1,4 @@
--- [[ ★PPINGYYY HUB★ - SMOOTH ANIMATION EDITION (Fixed Position) ]] --
+-- [[ ★PPINGYYY HUB - SMOOTH ANIMATION EDITION + SETTINGS ★ ]] --
 local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -123,10 +123,11 @@ local function createTabButton(text, posIndex)
     return btn
 end
 
-local Tab1Btn = createTabButton("🎣 ตกปลาออโต้", 0)
-local Tab2Btn = createTabButton("⚡ สกิลอัตโนมัติ", 1)
-local Tab3Btn = createTabButton("🛠️ อำนวยสะดวก", 2)
-local Tab4Btn = createTabButton("🏝️ วาร์ปเกาะ", 3)
+local Tab1Btn = createTabButton("🎣 ตกปลา", 0)
+local Tab2Btn = createTabButton("⚡ สกิล", 1)
+local Tab3Btn = createTabButton("🛠️ เครื่องมือ", 2)
+local Tab4Btn = createTabButton("🏝️ วาร์ป", 3)
+local Tab5Btn = createTabButton("⚙️ SETTINGS", 4) -- หมวดใหม่
 
 local function createPage()
     local page = Instance.new("ScrollingFrame", Pages)
@@ -143,6 +144,7 @@ local Page1 = createPage()
 local Page2 = createPage()
 local Page3 = createPage()
 local Page4 = createPage()
+local Page5 = createPage() -- หน้าต่าง Settings ว่างเปล่า
 
 local activePage = nil 
 local activeBtn = nil
@@ -180,6 +182,7 @@ Tab1Btn.MouseButton1Click:Connect(function() showPage(Page1, Tab1Btn) end)
 Tab2Btn.MouseButton1Click:Connect(function() showPage(Page2, Tab2Btn) end)
 Tab3Btn.MouseButton1Click:Connect(function() showPage(Page3, Tab3Btn) end)
 Tab4Btn.MouseButton1Click:Connect(function() showPage(Page4, Tab4Btn) end)
+Tab5Btn.MouseButton1Click:Connect(function() showPage(Page5, Tab5Btn) end)
 
 local function createNormalButton(parent, text, yPos)
     local btn = Instance.new("TextButton", parent)
