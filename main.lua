@@ -20,6 +20,7 @@ getgenv().NWKZ_AutoCast = false
 getgenv().PP_Noclip = false
 getgenv().PP_WalkSpeed = 16
 getgenv().PP_FishingThipActive = false
+getgenv().PP_Data = {Lang = "TH"}
 
 getgenv().PP_AutoSkillAll = false
 getgenv().PP_Skill_Z = false
@@ -123,10 +124,10 @@ local function createTabButton(text, posIndex)
     return btn
 end
 
-local Tab1Btn = createTabButton("🎣 ตกปลา", 0)
-local Tab2Btn = createTabButton("⚡ สกิล", 1)
-local Tab3Btn = createTabButton("🛠️ เครื่องมือ", 2)
-local Tab4Btn = createTabButton("🏝️ วาร์ป", 3)
+local Tab1Btn = createTabButton("🎣 fish", 0)
+local Tab2Btn = createTabButton("⚡ skill", 1)
+local Tab3Btn = createTabButton("🛠️ tool", 2)
+local Tab4Btn = createTabButton("🏝️ Teleport", 3)
 local Tab5Btn = createTabButton("⚙️ SETTINGS", 4) -- หมวดใหม่
 
 local function createPage()
@@ -144,7 +145,35 @@ local Page1 = createPage()
 local Page2 = createPage()
 local Page3 = createPage()
 local Page4 = createPage()
-local Page5 = createPage() -- หน้าต่าง Settings ว่างเปล่า
+local Page5 = createPage()-- แปะโค้ดนี้ต่อท้ายบรรทัด Page5 = createPage() ของมึงเลย
+local Title = Instance.new("TextLabel", Page5)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "--- SETTINGS ---"
+Title.TextColor3 = Color3.fromRGB(0, 255, 150)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+
+-- สร้างปุ่มสลับภาษา
+local function createLangBtn(text, yPos, lang)
+    local btn = Instance.new("TextButton", Page5)
+    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.Position = UDim2.new(0.05, 0, 0, yPos)
+    btn.Text = text
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    btn.MouseButton1Click:Connect(function()
+        getgenv().PP_Data.Lang = lang
+        print("Language set to: " .. lang)
+    end)
+    return btn
+end
+
+createLangBtn("ไทย (TH)", 40, "TH")
+createLangBtn("English (EN)", 90, "EN")
+
 
 local activePage = nil 
 local activeBtn = nil
