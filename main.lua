@@ -309,6 +309,7 @@ local function createTeleportButton(parent, name, x, y, z, yPos)
     btn.Size = UDim2.new(0.95, 0, 0, 32)
     btn.Position = UDim2.new(0.025, 0, 0, yPos)
     btn.Text = "🏝️ " .. name
+    btn:SetAttribute("OriginalName", name)
     btn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.GothamBold
@@ -435,35 +436,53 @@ local function UpdateUI()
             end
         end
     else
-        -- แปลเป็น EN ทั้งหมด
-        Tab1Btn.Text = "🎣 Fishing"
-        Tab2Btn.Text = "⚡ Skills"
-        Tab3Btn.Text = "🛠️ Tools"
-        Tab4Btn.Text = "🏝️ Teleport"
-        Tab5Btn.Text = "⚙️ Settings"
-        CastBtn.Text = "AUTO CAST: " .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
-        AnchorBtn.Text = "ANCHOR: " .. (getgenv().NWKZ_Anchor and "ON" or "OFF")
-        FishThipBtn.Text = "🟢 FISHING THIP: " .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
-        SellBtn.Text = "💰 SELL ALL"
-        SkillAllBtn.Text = "AUTO ALL SKILLS: " .. (getgenv().PP_AutoSkillAll and "ON" or "OFF")
-        NoclipBtn.Text = "NOCLIP: " .. (getgenv().PP_Noclip and "ON" or "OFF")
-        SpeedLabel.Text = "WALKSPEED: " .. tostring(getgenv().PP_WalkSpeed)
-        FlyBtn.Text = "🚀 FLY GUI"
-        -- ชื่อเกาะภาษาอังกฤษ
-        local pages = Page4:GetChildren()
-        for _, btn in pairs(pages) do
-            if btn:IsA("TextButton") then
-                if btn.Text:find("เกาะเทพนักตกปลาผู้เริ่มต้น") or btn.Text:find("Starter") then btn.Text = "🏝️ Starter Island"
-                elseif btn.Text:find("เกาะไม้ไผ่") or btn.Text:find("Bamboo") then btn.Text = "🏝️ Bamboo Island"
-                elseif btn.Text:find("เกาะหลุมขนาดใหญ่") or btn.Text:find("Big Hole") then btn.Text = "🏝️ Big Hole Island"
-                elseif btn.Text:find("เกาะน้ำตก") or btn.Text:find("Waterfall") then btn.Text = "🏝️ Waterfall Island"
-                elseif btn.Text:find("เกาะปลากรายพันธุ์") or btn.Text:find("Mutant") then btn.Text = "🏝️ Mutant Island"
-                elseif btn.Text:find("เกาะน้ำแข็ง") or btn.Text:find("Ice") then btn.Text = "🏝️ Ice Island"
-                elseif btn.Text:find("เกาะต้นมะพร้าว") or btn.Text:find("Coconut") then btn.Text = "🏝️ Coconut Island"
-                elseif btn.Text:find("เกาะแห่งฤดูใบไม้ร่วง") or btn.Text:find("Autumn") then btn.Text = "🏝️ Autumn Island"
-                elseif btn.Text:find("เกาะนักล่าบอส") or btn.Text:find("Boss") then btn.Text = "🏝️ Boss Island"
-                end
-            end
+-- [[ ฟังก์ชันอัปเดตภาษา (เอาไว้ล่างสุดของสคริปต์) ]] --
+local function UpdateUI()
+    local lang = getgenv().PP_Data.Lang
+    local isTH = (lang == "TH")
+    
+    -- หมวดหมู่
+    Tab1Btn.Text = isTH and "🎣 ตกปลา" or "🎣 Fishing"
+    Tab2Btn.Text = isTH and "⚡ สกิล" or "⚡ Skills"
+    Tab3Btn.Text = isTH and "🛠️ เครื่องมือ" or "🛠️ Tools"
+    Tab4Btn.Text = isTH and "🏝️ วาร์ป" or "🏝️ Teleport"
+    Tab5Btn.Text = isTH and "⚙️ ตั้งค่า" or "⚙️ Settings"
+    
+    -- ปุ่มหน้า 1
+    CastBtn.Text = (isTH and "เหวี่ยงเบ็ดออโต้: " or "AUTO CAST: ") .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
+    AnchorBtn.Text = (isTH and "ทำให้แถบอยู่ตรงกลาง: " or "ANCHOR: ") .. (getgenv().NWKZ_Anchor and "ON" or "OFF")
+    FishThipBtn.Text = (isTH and "🟢 เปิดปิดปุ่มตกปลาทิพย์: " or "🟢 FISHING THIP: ") .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
+    SellBtn.Text = isTH and "💰 ขายปลาทั้งหมด" or "💰 SELL ALL"
+    
+    -- ปุ่มหน้า 2
+    SkillAllBtn.Text = (isTH and "รวมกดทุกสกิล: " or "AUTO ALL SKILLS: ") .. (getgenv().PP_AutoSkillAll and "ON" or "OFF")
+    
+    -- ปุ่มหน้า 3
+    NoclipBtn.Text = (isTH and "ทะลุกำแพง: " or "NOCLIP: ") .. (getgenv().PP_Noclip and "ON" or "OFF")
+    SpeedLabel.Text = (isTH and "ความเร็วในการเดิน: " or "WALKSPEED: ") .. tostring(getgenv().PP_WalkSpeed)
+    FlyBtn.Text = isTH and "🚀 เปิดเมนูบิน" or "🚀 FLY GUI"
+
+    -- ชื่อเกาะ
+    local islandNames = {
+        ["เกาะเทพตกปลาผู้เริ่มต้น"] = "Starter Island",
+        ["เกาะไม้ไผ่"] = "Bamboo Island",
+        ["เกาะหลุมขนาดใหญ่"] = "Big Hole Island",
+        ["เกาะน้ำตก"] = "Waterfall Island",
+        ["เกาะปลากรายพันธุ์"] = "Mutant Island",
+        ["เกาะน้ำแข็ง"] = "Ice Island",
+        ["เกาะต้นมะพร้าว"] = "Coconut Island",
+        ["เกาะแห่งฤดูใบไม้ร่วง"] = "Autumn Island",
+        ["เกาะนักล่าบอส"] = "Boss Island"
+    }
+    for _, btn in pairs(Page4:GetChildren()) do
+        if btn:IsA("TextButton") then
+            local originalName = btn:GetAttribute("OriginalName") or btn.Text:gsub("🏝️ ", "")
+            if not btn:GetAttribute("OriginalName") then btn:SetAttribute("OriginalName", originalName) end
+            btn.Text = "🏝️ " .. (isTH and originalName or (islandNames[originalName] or originalName))
         end
     end
 end
+
+-- สั่งรันครั้งแรกเพื่อให้ค่าเริ่มต้นทำงาน
+UpdateUI()
+
