@@ -124,11 +124,11 @@ local function createTabButton(text, posIndex)
     return btn
 end
 
-local Tab1Btn = createTabButton("🎣 fish", 0)
-local Tab2Btn = createTabButton("⚡ skill", 1)
-local Tab3Btn = createTabButton("🛠️ tool", 2)
-local Tab4Btn = createTabButton("🏝️ Teleport", 3)
-local Tab5Btn = createTabButton("⚙️ SETTINGS", 4) -- หมวดใหม่
+local Tab1Btn = createTabButton("🎣 ตกปลา", 0)
+local Tab2Btn = createTabButton("⚡ สกิล", 1)
+local Tab3Btn = createTabButton("🛠️ เครื่องมือ", 2)
+local Tab4Btn = createTabButton("🏝️ วาร์ป", 3)
+local Tab5Btn = createTabButton("⚙️ ตั้งค่า", 4) -- หมวดใหม่
 
 local function createPage()
     local page = Instance.new("ScrollingFrame", Pages)
@@ -145,7 +145,7 @@ local Page1 = createPage()
 local Page2 = createPage()
 local Page3 = createPage()
 local Page4 = createPage()
-local Page5 = createPage()-- แปะโค้ดนี้ต่อท้ายบรรทัด Page5 = createPage() ของมึงเลย
+local Page5 = createPage()
 local Title = Instance.new("TextLabel", Page5)
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.Text = "--- SETTINGS ---"
@@ -166,6 +166,7 @@ local function createLangBtn(text, yPos, lang)
     
     btn.MouseButton1Click:Connect(function()
         getgenv().PP_Data.Lang = lang
+        UpdateUI()
         print("Language set to: " .. lang)
     end)
     return btn
@@ -173,6 +174,7 @@ end
 
 createLangBtn("ไทย (TH)", 40, "TH")
 createLangBtn("English (EN)", 90, "EN")
+UpdateUI()
 
 
 local activePage = nil 
@@ -226,13 +228,13 @@ local function createNormalButton(parent, text, yPos)
     return btn
 end
 
-local CastBtn = createNormalButton(Page1, "AUTO CAST (เหวี่ยงเบ็ดออโต้): OFF", 5)
-local AnchorBtn = createNormalButton(Page1, "ANCHOR (ทำให้แถบอยู่ตรงกลาง): OFF", 42)
+local CastBtn = createNormalButton(Page1, "เหวี่ยงเบ็ดออโต้: OFF", 5)
+local AnchorBtn = createNormalButton(Page1, "ทำให้แถบอยู่ตรงกลาง: OFF", 42)
 local FishThipBtn = createNormalButton(Page1, "🟢 เปิดปิดปุ่มตกปลาทิพย์ (ขวาจอ): OFF", 79)
 local SellBtn = Instance.new("TextButton", Page1)
 SellBtn.Size = UDim2.new(0.95, 0, 0, 32)
 SellBtn.Position = UDim2.new(0.025, 0, 0, 116)
-SellBtn.Text = "💰 SELL ALL (ขายปลาทั้งหมด)"
+SellBtn.Text = "💰 ขายปลาทั้งหมด"
 SellBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 40)
 SellBtn.TextColor3 = Color3.fromRGB(0, 255, 150)
 SellBtn.Font = Enum.Font.GothamBold
@@ -264,11 +266,11 @@ createGridSkillBtn("Z", 1, "PP_Skill_Z")
 createGridSkillBtn("X", 2, "PP_Skill_X")
 createGridSkillBtn("C", 3, "PP_Skill_C")
 
-local NoclipBtn = createNormalButton(Page3, "NOCLIP (ทะลุกำแพง): OFF", 5)
+local NoclipBtn = createNormalButton(Page3, "ทะลุกำแพง: OFF", 5)
 local SpeedLabel = Instance.new("TextLabel", Page3)
 SpeedLabel.Size = UDim2.new(1, -10, 0, 20)
 SpeedLabel.Position = UDim2.new(0, 0, 0, 45)
-SpeedLabel.Text = "WALKSPEED (วิ่งเร็ว): 16"
+SpeedLabel.Text = "ความเร็วในการเดิน: 16"
 SpeedLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
 SpeedLabel.Font = Enum.Font.Gotham
 SpeedLabel.TextSize = 11
@@ -294,7 +296,7 @@ Instance.new("UICorner", SpeedDownBtn).CornerRadius = UDim.new(0, 5)
 local FlyBtn = Instance.new("TextButton", Page3)
 FlyBtn.Size = UDim2.new(0.95, 0, 0, 35)
 FlyBtn.Position = UDim2.new(0.025, 0, 0, 110)
-FlyBtn.Text = "🚀 FLY GUI (เปิดโปรบิน)"
+FlyBtn.Text = "เปิดเมนูบิน"
 FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 150)
 FlyBtn.TextColor3 = Color3.new(1, 1, 1)
 FlyBtn.Font = Enum.Font.GothamBold
@@ -318,7 +320,7 @@ local function createTeleportButton(parent, name, x, y, z, yPos)
         end
     end)
 end
-createTeleportButton(Page4, "เกาะตกปลาผู้เริ่มต้น", -236, 6, 56, 5)
+createTeleportButton(Page4, "เกาะเทพตกปลาผู้เริ่มต้น", -236, 6, 56, 5)
 createTeleportButton(Page4, "เกาะไม้ไผ่", -1226, 5, -23, 42)
 createTeleportButton(Page4, "เกาะหลุมขนาดใหญ่", 74, 6, 1216, 79)
 createTeleportButton(Page4, "เกาะน้ำตก", -1285, 6, 1240, 116)
@@ -398,3 +400,70 @@ UserInputService.InputChanged:Connect(function(input)
         update(input) 
     end 
 end)
+local function UpdateUI()
+    local lang = getgenv().PP_Data.Lang
+    if lang == "TH" then
+        -- หมวดหมู่
+        Tab1Btn.Text = "🎣 ตกปลา"
+        Tab2Btn.Text = "⚡ สกิล"
+        Tab3Btn.Text = "🛠️ เครื่องมือ"
+        Tab4Btn.Text = "🏝️ วาร์ป"
+        Tab5Btn.Text = "⚙️ ตั้งค่า"
+        -- ปุ่มหลัก
+        CastBtn.Text = "AUTO CAST (เหวี่ยงเบ็ดออโต้): " .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
+        AnchorBtn.Text = "ANCHOR (ทำให้แถบอยู่ตรงกลาง): " .. (getgenv().NWKZ_Anchor and "ON" or "OFF")
+        FishThipBtn.Text = "🟢 เปิดปิดปุ่มตกปลาทิพย์: " .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
+        SellBtn.Text = "💰 ขายปลาทั้งหมด"
+        SkillAllBtn.Text = "AUTO ALL SKILLS (รวมกดทุกสกิล): " .. (getgenv().PP_AutoSkillAll and "ON" or "OFF")
+        NoclipBtn.Text = "NOCLIP (ทะลุกำแพง): " .. (getgenv().PP_Noclip and "ON" or "OFF")
+        SpeedLabel.Text = "ความเร็วในการเดิน: " .. tostring(getgenv().PP_WalkSpeed)
+        FlyBtn.Text = "🚀 เปิดเมนูบิน"
+        -- ชื่อเกาะ
+        local pages = Page4:GetChildren()
+        for _, btn in pairs(pages) do
+            if btn:IsA("TextButton") then
+                if btn.Text:find("เกาะเทพนักตกปลาผู้เริ่มต้น") or btn.Text:find("Starter") then btn.Text = "🏝️ เกาะเทพนักตกปลาผู้เริ่มต้น"
+                elseif btn.Text:find("เกาะไม้ไผ่") or btn.Text:find("Bamboo") then btn.Text = "🏝️ เกาะไม้ไผ่"
+                elseif btn.Text:find("เกาะหลุมขนาดใหญ่") or btn.Text:find("Big Hole") then btn.Text = "🏝️ เกาะหลุมขนาดใหญ่"
+                elseif btn.Text:find("เกาะน้ำตก") or btn.Text:find("Waterfall") then btn.Text = "🏝️ เกาะน้ำตก"
+                elseif btn.Text:find("เกาะปลากรายพันธุ์") or btn.Text:find("Mutant") then btn.Text = "🏝️ เกาะปลากรายพันธุ์"
+                elseif btn.Text:find("เกาะน้ำแข็ง") or btn.Text:find("Ice") then btn.Text = "🏝️ เกาะน้ำแข็ง"
+                elseif btn.Text:find("เกาะต้นมะพร้าว") or btn.Text:find("Coconut") then btn.Text = "🏝️ เกาะต้นมะพร้าว"
+                elseif btn.Text:find("เกาะแห่งฤดูใบไม้ร่วง") or btn.Text:find("Autumn") then btn.Text = "🏝️ เกาะแห่งฤดูใบไม้ร่วง"
+                elseif btn.Text:find("เกาะนักล่าบอส") or btn.Text:find("Boss") then btn.Text = "🏝️ เกาะนักล่าบอส"
+                end
+            end
+        end
+    else
+        -- แปลเป็น EN ทั้งหมด
+        Tab1Btn.Text = "🎣 Fishing"
+        Tab2Btn.Text = "⚡ Skills"
+        Tab3Btn.Text = "🛠️ Tools"
+        Tab4Btn.Text = "🏝️ Teleport"
+        Tab5Btn.Text = "⚙️ Settings"
+        CastBtn.Text = "AUTO CAST: " .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
+        AnchorBtn.Text = "ANCHOR: " .. (getgenv().NWKZ_Anchor and "ON" or "OFF")
+        FishThipBtn.Text = "🟢 FISHING THIP: " .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
+        SellBtn.Text = "💰 SELL ALL"
+        SkillAllBtn.Text = "AUTO ALL SKILLS: " .. (getgenv().PP_AutoSkillAll and "ON" or "OFF")
+        NoclipBtn.Text = "NOCLIP: " .. (getgenv().PP_Noclip and "ON" or "OFF")
+        SpeedLabel.Text = "WALKSPEED: " .. tostring(getgenv().PP_WalkSpeed)
+        FlyBtn.Text = "🚀 FLY GUI"
+        -- ชื่อเกาะภาษาอังกฤษ
+        local pages = Page4:GetChildren()
+        for _, btn in pairs(pages) do
+            if btn:IsA("TextButton") then
+                if btn.Text:find("เกาะเทพนักตกปลาผู้เริ่มต้น") or btn.Text:find("Starter") then btn.Text = "🏝️ Starter Island"
+                elseif btn.Text:find("เกาะไม้ไผ่") or btn.Text:find("Bamboo") then btn.Text = "🏝️ Bamboo Island"
+                elseif btn.Text:find("เกาะหลุมขนาดใหญ่") or btn.Text:find("Big Hole") then btn.Text = "🏝️ Big Hole Island"
+                elseif btn.Text:find("เกาะน้ำตก") or btn.Text:find("Waterfall") then btn.Text = "🏝️ Waterfall Island"
+                elseif btn.Text:find("เกาะปลากรายพันธุ์") or btn.Text:find("Mutant") then btn.Text = "🏝️ Mutant Island"
+                elseif btn.Text:find("เกาะน้ำแข็ง") or btn.Text:find("Ice") then btn.Text = "🏝️ Ice Island"
+                elseif btn.Text:find("เกาะต้นมะพร้าว") or btn.Text:find("Coconut") then btn.Text = "🏝️ Coconut Island"
+                elseif btn.Text:find("เกาะแห่งฤดูใบไม้ร่วง") or btn.Text:find("Autumn") then btn.Text = "🏝️ Autumn Island"
+                elseif btn.Text:find("เกาะนักล่าบอส") or btn.Text:find("Boss") then btn.Text = "🏝️ Boss Island"
+                end
+            end
+        end
+    end
+end
