@@ -1,3 +1,16 @@
+print("--- เริ่มโหลด PPINGYYY HUB ---")
+
+local success, err = pcall(function()
+    -- เอาโค้ดทั้งหมดของมึง (ตั้งแต่ local lp = ... ยันจบ) มาวางไว้ในนี้
+    -- ...
+end)
+
+if success then
+    print("--- รันสำเร็จเว้ย! ---")
+else
+    print("--- เฮ้ย! บัคโค้ดมึงเอง: " .. err .. " ---")
+end
+
 -- [[ ★PPINGYYY HUB - SMOOTH ANIMATION EDITION + SETTINGS ★ ]] --
 local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
