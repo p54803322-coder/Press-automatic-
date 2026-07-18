@@ -1,16 +1,3 @@
-print("--- เริ่มโหลด PPINGYYY HUB ---")
-
-local success, err = pcall(function()
-    -- เอาโค้ดทั้งหมดของมึง (ตั้งแต่ local lp = ... ยันจบ) มาวางไว้ในนี้
-    -- ...
-end)
-
-if success then
-    print("--- รันสำเร็จเว้ย! ---")
-else
-    print("--- เฮ้ย! บัคโค้ดมึงเอง: " .. err .. " ---")
-end
-
 -- [[ ★PPINGYYY HUB - SMOOTH ANIMATION EDITION + SETTINGS ★ ]] --
 local lp = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
@@ -33,7 +20,6 @@ getgenv().NWKZ_AutoCast = false
 getgenv().PP_Noclip = false
 getgenv().PP_WalkSpeed = 16
 getgenv().PP_FishingThipActive = false
-getgenv().PP_Data = {Lang = "TH"}
 
 getgenv().PP_AutoSkillAll = false
 getgenv().PP_Skill_Z = false
@@ -141,7 +127,6 @@ local Tab1Btn = createTabButton("🎣 ตกปลา", 0)
 local Tab2Btn = createTabButton("⚡ สกิล", 1)
 local Tab3Btn = createTabButton("🛠️ เครื่องมือ", 2)
 local Tab4Btn = createTabButton("🏝️ วาร์ป", 3)
-local Tab5Btn = createTabButton("⚙️ ตั้งค่า", 4) -- หมวดใหม่
 
 local function createPage()
     local page = Instance.new("ScrollingFrame", Pages)
@@ -159,36 +144,6 @@ local Page2 = createPage()
 local Page3 = createPage()
 local Page4 = createPage()
 local Page5 = createPage()
-local Title = Instance.new("TextLabel", Page5)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "--- SETTINGS ---"
-Title.TextColor3 = Color3.fromRGB(0, 255, 150)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-
--- สร้างปุ่มสลับภาษา
-local function createLangBtn(text, yPos, lang)
-    local btn = Instance.new("TextButton", Page5)
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
-    btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.GothamBold
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    
-    btn.MouseButton1Click:Connect(function()
-        getgenv().PP_Data.Lang = lang
-        UpdateUI()
-        print("Language set to: " .. lang)
-    end)
-    return btn
-end
-
-createLangBtn("ไทย (TH)", 40, "TH")
-createLangBtn("English (EN)", 90, "EN")
-UpdateUI()
-
 
 local activePage = nil 
 local activeBtn = nil
@@ -322,7 +277,6 @@ local function createTeleportButton(parent, name, x, y, z, yPos)
     btn.Size = UDim2.new(0.95, 0, 0, 32)
     btn.Position = UDim2.new(0.025, 0, 0, yPos)
     btn.Text = "🏝️ " .. name
-    btn:SetAttribute("OriginalName", name)
     btn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.GothamBold
@@ -383,144 +337,3 @@ local function update(input) local delta = input.Position - dragStart; Main.Posi
 TitleBar.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; dragStart = input.Position; startPos = Main.Position; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 TitleBar.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
 UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then update(input) end end)
--- ส่วนท้ายสุดของสคริปต์ที่มึงขาดไป
-local dragging, dragInput, dragStart, startPos
-local function update(input) 
-    local delta = input.Position - dragStart
-    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) 
-end
-
-TitleBar.InputBegan:Connect(function(input) 
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-        input.Changed:Connect(function() 
-            if input.UserInputState == Enum.UserInputState.End then 
-                dragging = false 
-            end 
-        end) 
-    end 
-end)
-
-TitleBar.InputChanged:Connect(function(input) 
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then 
-        dragInput = input 
-    end 
-end)
-
-UserInputService.InputChanged:Connect(function(input) 
-    if input == dragInput and dragging then 
-        update(input) 
-    end 
-end)
-local function UpdateUI()
-    local lang = getgenv().PP_Data.Lang
-    if lang == "TH" then
-        -- หมวดหมู่
-        Tab1Btn.Text = "🎣 ตกปลา"
-        Tab2Btn.Text = "⚡ สกิล"
-        Tab3Btn.Text = "🛠️ เครื่องมือ"
-        Tab4Btn.Text = "🏝️ วาร์ป"
-        Tab5Btn.Text = "⚙️ ตั้งค่า"
-        -- ปุ่มหลัก
-        CastBtn.Text = "AUTO CAST (เหวี่ยงเบ็ดออโต้): " .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
-        AnchorBtn.Text = "ANCHOR (ทำให้แถบอยู่ตรงกลาง): " .. (getgenv().NWKZ_Anchor and "ON" or "OFF")
-        FishThipBtn.Text = "🟢 เปิดปิดปุ่มตกปลาทิพย์: " .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
-        SellBtn.Text = "💰 ขายปลาทั้งหมด"
-        SkillAllBtn.Text = "AUTO ALL SKILLS (รวมกดทุกสกิล): " .. (getgenv().PP_AutoSkillAll and "ON" or "OFF")
-        NoclipBtn.Text = "NOCLIP (ทะลุกำแพง): " .. (getgenv().PP_Noclip and "ON" or "OFF")
-        SpeedLabel.Text = "ความเร็วในการเดิน: " .. tostring(getgenv().PP_WalkSpeed)
-        FlyBtn.Text = "🚀 เปิดเมนูบิน"
-        -- ชื่อเกาะ
-        local pages = Page4:GetChildren()
-        for _, btn in pairs(pages) do
-            if btn:IsA("TextButton") then
-                if btn.Text:find("เกาะเทพนักตกปลาผู้เริ่มต้น") or btn.Text:find("Starter") then btn.Text = "🏝️ เกาะเทพนักตกปลาผู้เริ่มต้น"
-                elseif btn.Text:find("เกาะไม้ไผ่") or btn.Text:find("Bamboo") then btn.Text = "🏝️ เกาะไม้ไผ่"
-                elseif btn.Text:find("เกาะหลุมขนาดใหญ่") or btn.Text:find("Big Hole") then btn.Text = "🏝️ เกาะหลุมขนาดใหญ่"
-                elseif btn.Text:find("เกาะน้ำตก") or btn.Text:find("Waterfall") then btn.Text = "🏝️ เกาะน้ำตก"
-                elseif btn.Text:find("เกาะปลากรายพันธุ์") or btn.Text:find("Mutant") then btn.Text = "🏝️ เกาะปลากรายพันธุ์"
-                elseif btn.Text:find("เกาะน้ำแข็ง") or btn.Text:find("Ice") then btn.Text = "🏝️ เกาะน้ำแข็ง"
-                elseif btn.Text:find("เกาะต้นมะพร้าว") or btn.Text:find("Coconut") then btn.Text = "🏝️ เกาะต้นมะพร้าว"
-                elseif btn.Text:find("เกาะแห่งฤดูใบไม้ร่วง") or btn.Text:find("Autumn") then btn.Text = "🏝️ เกาะแห่งฤดูใบไม้ร่วง"
-                elseif btn.Text:find("เกาะนักล่าบอส") or btn.Text:find("Boss") then btn.Text = "🏝️ เกาะนักล่าบอส"
-                end
-            end
-        end
-    else
--- [[ ฟังก์ชันอัปเดตภาษา (เอาไว้ล่างสุดของสคริปต์) ]] --
-local function UpdateUI()
-    local lang = getgenv().PP_Data.Lang
-    local isTH = (lang == "TH")
-    
-    -- หมวดหมู่
-    Tab1Btn.Text = isTH and "🎣 ตกปลา" or "🎣 Fishing"
-    Tab2Btn.Text = isTH and "⚡ สกิล" or "⚡ Skills"
-    Tab3Btn.Text = isTH and "🛠️ เครื่องมือ" or "🛠️ Tools"
-    Tab4Btn.Text = isTH and "🏝️ วาร์ป" or "🏝️ Teleport"
-    Tab5Btn.Text = isTH and "⚙️ ตั้งค่า" or "⚙️ Settings"
-    
-    -- ปุ่มหน้า 1
-    CastBtn.Text = (isTH and "เหวี่ยงเบ็ดออโต้: " or "AUTO CAST: ") .. (getgenv().NWKZ_AutoCast and "ON" or "OFF")
-    AnchorBtn.Text = (isTH and "ทำให้แถบอยู่ตรงกลาง: " or "ANCHOR: ") .. (getgenv().NWKZ_Anchor and "ON" or "OFF")
-    FishThipBtn.Text = (isTH and "🟢 เปิดปิดปุ่มตกปลาทิพย์: " or "🟢 FISHING THIP: ") .. (getgenv().PP_FishingThipActive and "ON" or "OFF")
-    SellBtn.Text = isTH and "💰 ขายปลาทั้งหมด" or "💰 SELL ALL"
-    
-    -- ปุ่มหน้า 2
-    SkillAllBtn.Text = (isTH and "รวมกดทุกสกิล: " or "AUTO ALL SKILLS: ") .. (getgenv().PP_AutoSkillAll and "ON" or "OFF")
-    
-    -- ปุ่มหน้า 3
-    NoclipBtn.Text = (isTH and "ทะลุกำแพง: " or "NOCLIP: ") .. (getgenv().PP_Noclip and "ON" or "OFF")
-    SpeedLabel.Text = (isTH and "ความเร็วในการเดิน: " or "WALKSPEED: ") .. tostring(getgenv().PP_WalkSpeed)
-    FlyBtn.Text = isTH and "🚀 เปิดเมนูบิน" or "🚀 FLY GUI"
-
-    -- ชื่อเกาะ
-    local islandNames = {
-        ["เกาะเทพตกปลาผู้เริ่มต้น"] = "Starter Island",
-        ["เกาะไม้ไผ่"] = "Bamboo Island",
-        ["เกาะหลุมขนาดใหญ่"] = "Big Hole Island",
-        ["เกาะน้ำตก"] = "Waterfall Island",
-        ["เกาะปลากรายพันธุ์"] = "Mutant Island",
-        ["เกาะน้ำแข็ง"] = "Ice Island",
-        ["เกาะต้นมะพร้าว"] = "Coconut Island",
-        ["เกาะแห่งฤดูใบไม้ร่วง"] = "Autumn Island",
-        ["เกาะนักล่าบอส"] = "Boss Island"
-    }
-    for _, btn in pairs(Page4:GetChildren()) do
-        if btn:IsA("TextButton") then
-            local originalName = btn:GetAttribute("OriginalName") or btn.Text:gsub("🏝️ ", "")
-            if not btn:GetAttribute("OriginalName") then btn:SetAttribute("OriginalName", originalName) end
-            btn.Text = "🏝️ " .. (isTH and originalName or (islandNames[originalName] or originalName))
-        end
-    end
-end
-
--- สั่งรันครั้งแรกเพื่อให้ค่าเริ่มต้นทำงาน
-UpdateUI()
-        -- เอาอันนี้ไปวางต่อท้ายโค้ดเดิมที่มึงค้างอยู่
-TitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-TitleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
-    end
-end)
-
